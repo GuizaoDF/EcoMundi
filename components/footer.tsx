@@ -109,8 +109,11 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t border-background/10">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-sm text-background/50">
-              &copy; {new Date().getFullYear()} ECO MUNDI Consultoria e Gestão. Todos os direitos reservados.
+              &copy; {new Date().getFullYear()} Eco Mundi Consultoria e Gestão. Todos os direitos reservados.
             </p>
+            <p className="text-xs text-background/50">
+      CNPJ: 07.970.394/0001-50
+    </p>
             <div className="flex gap-6">
               <Link
                 href="#"

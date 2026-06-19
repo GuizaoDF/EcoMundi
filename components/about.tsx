@@ -21,40 +21,56 @@ const sectors = [
     icon: Building2,
     title: "Infraestrutura, portos e aeroportos",
     description:
-      "Grandes obras e concessões enfrentam licenciamentos complexos de longo prazo. Operações estratégicas que demandam governança ambiental, segurança regulatória e gestão integrada de riscos.",
+      "Grandes obras, concessões e operações estratégicas exigem licenciamentos complexos, planejamento de longo prazo, governança ambiental, segurança regulatória e gestão integrada de riscos.",
   },
-  { icon: Factory, title: "Indústrias e operações sujeitas a licenciamento", 
+  {
+    icon: Factory,
+    title: "Indústrias e operações sujeitas a licenciamento",
     description:
-    "Atividades com alto potencial poluidor (emissões, resíduos e efluentes). Exigem gestão estratégica contínua da conformidade ambiental, seja para novos empreendimentos ou para atendimento de condicionantes e manutenção da regularidade operacional para evitar riscos à continuidade dos negócios.",
-},
-  { icon: Hotel, title: "Hotelaria e turismo",
+      "Atividades com potencial impacto ambiental demandam controle contínuo de emissões, resíduos, efluentes, condicionantes e obrigações regulatórias, reduzindo riscos à continuidade operacional.",
+  },
+  {
+    icon: Hotel,
+    title: "Hotelaria e turismo",
     description:
-    "Empreendimentos turísticos dependem da manutenção de licenças, gestão adequada de recursos naturais, conformidade regulatória e proteção reputacional. Pequenas falhas podem gerar impactos financeiros, operacionais e de imagem.",
-},
-  { icon: GraduationCap, title: "Escola e redes de ensino",
+      "Empreendimentos turísticos dependem da regularidade de licenças, do uso responsável de recursos naturais e da gestão de riscos ambientais, operacionais e reputacionais.",
+  },
+  {
+    icon: GraduationCap,
+    title: "Escola e redes de ensino",
     description:
-    "Instituições que precisam fortalecer sua governança institucional, reduzir passivos ocultos, atender requisitos regulatórios e ampliar a segurança perante famílias, comunidade acadêmica e órgãos de controle.",
-},
-  { icon: Home, title: "Empreendimentos imobiliários",
+      "Instituições de ensino precisam fortalecer sua governança, prevenir passivos, atender exigências regulatórias e ampliar a segurança perante famílias, comunidade acadêmica e órgãos de controle.",
+  },
+  {
+    icon: Home,
+    title: "Empreendimentos imobiliários",
     description:
-    "regularização fundiária, processos de loteamento, recursosadministrativos e judiciais, análise de viabilidade e Due Diligence, dentre outros",
-},
-  { icon: Tractor, title: "Agronegócio e Logística" ,
+      "Projetos imobiliários exigem análise de viabilidade, regularização fundiária, licenciamento, due diligence ambiental e atuação estratégica em processos administrativos e judiciais.",
+  },
+  {
+    icon: Tractor,
+    title: "Agronegócio e Logística",
     description:
-    "Setores dependentes de cadeias globais, uso do solo e armazenamento. Precisam de conformidade ambiental estrita para garantir linhas de crédito verde e evitar barreiras de exportação.",
-},
-  { icon: HandCoins, title: "Investimentos e operações",
+      "Setores ligados ao uso do solo, armazenamento, transporte e cadeias produtivas dependem de conformidade ambiental para reduzir riscos, preservar crédito e evitar barreiras comerciais.",
+  },
+  {
+    icon: HandCoins,
+    title: "Investimentos e operações",
     description:
-    "Fusões e aquisições exigem auditoria prévia profunda. Mapear passivos ambientais ocultos protege o capital do comprador e precifica o valor real do negócio.",
-},
-  { icon: Hospital, title: "Hospitais, clínicas e laboratórios",
+      "Operações societárias, fusões, aquisições e investimentos exigem avaliação prévia de passivos ambientais, riscos regulatórios e impactos que podem comprometer o valor real do negócio.",
+  },
+  {
+    icon: Hospital,
+    title: "Hospitais, clínicas e laboratórios",
     description:
-    "Geradores de resíduos de saúde perigosos (PGRSS). Exigem licenças sanitárias e ambientais integradas e rastreabilidade dos resíduos. A gestão inadequada desses requisitos pode gerar riscos operacionais, sanções administrativas e impactos reputacionais relevantes.",
-},
-  { icon: Landmark, title: "Instituições públicas e privadas",
+      "Serviços de saúde exigem gestão rigorosa de resíduos, licenças sanitárias e ambientais, rastreabilidade e controles internos para reduzir riscos operacionais, sanções e impactos reputacionais.",
+  },
+  {
+    icon: Landmark,
+    title: "Instituições públicas e privadas",
     description:
-    "Organizações, instituições, negócios ou serviços sujeitos a requisitos ambientais, condicionantes,obrigações regulatórias e mecanismos de controle que demandam governança, conformidade e segurança institucional.",
-},
+      "Organizações sujeitas a requisitos ambientais, condicionantes, obrigações regulatórias e mecanismos de controle precisam de governança, conformidade e segurança institucional.",
+  },
 ];
 
 type Sector = {
@@ -72,13 +88,16 @@ export function About() {
   };
 
   return (
-    <section id="sobre" className="relative min-h-screen overflow-hidden scroll-mt-30">
-<div
-  className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-  style={{
-    backgroundImage: "url('/about-bg.png')",
-  }}
-/>
+    <section
+      id="sobre"
+      className="relative min-h-screen overflow-hidden scroll-mt-[120px]"
+    >
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url('/about-bg.png')",
+        }}
+      />
 
       <div className="absolute inset-0 bg-gradient-to-r from-[#061a10]/95 via-[#061a10]/58 to-[#061a10]/20" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-black/10" />
@@ -194,37 +213,54 @@ export function About() {
       </div>
 
       {selectedSector && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-2xl rounded-2xl border border-lime-300/30 bg-[#061a10] p-7 shadow-2xl">
+        <div
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm animate-[fadeIn_220ms_ease-out]"
+          onClick={() => setSelectedSector(null)}
+        >
+          <aside
+            className="
+              fixed right-0 top-0 h-full w-full max-w-xl
+              bg-[#061a10]/95 border-l border-lime-300/30
+              shadow-2xl px-7 py-8 md:px-10 md:py-10
+              animate-[drawerIn_320ms_ease-out]
+            "
+            onClick={(event) => event.stopPropagation()}
+          >
             <button
               type="button"
               onClick={() => setSelectedSector(null)}
-              className="absolute right-5 top-5 text-white/70 hover:text-lime-300 transition"
+              className="absolute right-6 top-6 text-white/70 hover:text-lime-300 transition"
               aria-label="Fechar"
             >
-              <X className="h-6 w-6" />
+              <X className="h-7 w-7" />
             </button>
 
-         
+            <div className="mt-16">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-lime-300/90">
+                Saiba mais
+              </p>
 
-            <h3 className="font-serif text-3xl font-semibold text-white mb-5 pr-10">
-              {selectedSector.title}
-            </h3>
+              <h3 className="font-serif text-4xl md:text-5xl font-semibold leading-tight tracking-tight text-white drop-shadow-sm pr-8">
+                {selectedSector.title}
+              </h3>
 
-            <p className="text-white/85 text-lg leading-relaxed">
-              {selectedSector.description}
-            </p>
+              <div className="mt-6 h-[2px] w-16 bg-lime-300" />
 
-            <div className="mt-7 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setSelectedSector(null)}
-                className="rounded-xl border border-lime-300/50 px-5 py-3 text-white hover:bg-lime-700/50 transition"
-              >
-                Fechar
-              </button>
+              <p className="mt-7 text-white/85 text-lg leading-relaxed">
+                {selectedSector.description}
+              </p>
+
+              <div className="mt-9">
+                <button
+                  type="button"
+                  onClick={() => setSelectedSector(null)}
+                  className="rounded-xl border border-lime-300/50 px-6 py-3.5 text-white font-medium hover:bg-lime-700/50 transition"
+                >
+                  Entendi
+                </button>
+              </div>
             </div>
-          </div>
+          </aside>
         </div>
       )}
     </section>

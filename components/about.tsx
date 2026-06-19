@@ -23,14 +23,38 @@ const sectors = [
     description:
       "Grandes obras e concessões enfrentam licenciamentos complexos de longo prazo. Operações estratégicas que demandam governança ambiental, segurança regulatória e gestão integrada de riscos.",
   },
-  { icon: Factory, title: "Indústrias e operações sujeitas a licenciamento" },
-  { icon: Hotel, title: "Hotelaria e turismo" },
-  { icon: GraduationCap, title: "Escola e redes de ensino" },
-  { icon: Home, title: "Empreendimentos imobiliários" },
-  { icon: Tractor, title: "Agronegócio e Logística" },
-  { icon: HandCoins, title: "Investimentos e operações" },
-  { icon: Hospital, title: "Hospitais, clínicas e laboratórios" },
-  { icon: Landmark, title: "Instituições públicas e privadas" },
+  { icon: Factory, title: "Indústrias e operações sujeitas a licenciamento", 
+    description:
+    "Atividades com alto potencial poluidor (emissões, resíduos e efluentes). Exigem gestão estratégica contínua da conformidade ambiental, seja para novos empreendimentos ou para atendimento de condicionantes e manutenção da regularidade operacional para evitar riscos à continuidade dos negócios.",
+},
+  { icon: Hotel, title: "Hotelaria e turismo",
+    description:
+    "Empreendimentos turísticos dependem da manutenção de licenças, gestão adequada de recursos naturais, conformidade regulatória e proteção reputacional. Pequenas falhas podem gerar impactos financeiros, operacionais e de imagem.",
+},
+  { icon: GraduationCap, title: "Escola e redes de ensino",
+    description:
+    "Instituições que precisam fortalecer sua governança institucional, reduzir passivos ocultos, atender requisitos regulatórios e ampliar a segurança perante famílias, comunidade acadêmica e órgãos de controle.",
+},
+  { icon: Home, title: "Empreendimentos imobiliários",
+    description:
+    "regularização fundiária, processos de loteamento, recursosadministrativos e judiciais, análise de viabilidade e Due Diligence, dentre outros",
+},
+  { icon: Tractor, title: "Agronegócio e Logística" ,
+    description:
+    "Setores dependentes de cadeias globais, uso do solo e armazenamento. Precisam de conformidade ambiental estrita para garantir linhas de crédito verde e evitar barreiras de exportação.",
+},
+  { icon: HandCoins, title: "Investimentos e operações",
+    description:
+    "Fusões e aquisições exigem auditoria prévia profunda. Mapear passivos ambientais ocultos protege o capital do comprador e precifica o valor real do negócio.",
+},
+  { icon: Hospital, title: "Hospitais, clínicas e laboratórios",
+    description:
+    "Geradores de resíduos de saúde perigosos (PGRSS). Exigem licenças sanitárias e ambientais integradas e rastreabilidade dos resíduos. A gestão inadequada desses requisitos pode gerar riscos operacionais, sanções administrativas e impactos reputacionais relevantes.",
+},
+  { icon: Landmark, title: "Instituições públicas e privadas",
+    description:
+    "Organizações, instituições, negócios ou serviços sujeitos a requisitos ambientais, condicionantes,obrigações regulatórias e mecanismos de controle que demandam governança, conformidade e segurança institucional.",
+},
 ];
 
 type Sector = {
@@ -48,13 +72,13 @@ export function About() {
   };
 
   return (
-    <section id="sobre" className="relative min-h-screen overflow-hidden">
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: "url('/hero-bg.png')",
-        }}
-      />
+    <section id="sobre" className="relative min-h-screen overflow-hidden scroll-mt-30">
+<div
+  className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+  style={{
+    backgroundImage: "url('/about-bg.png')",
+  }}
+/>
 
       <div className="absolute inset-0 bg-gradient-to-r from-[#061a10]/95 via-[#061a10]/58 to-[#061a10]/20" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-black/10" />
@@ -140,7 +164,7 @@ export function About() {
               </div>
             </div>
 
-            <div className="mt-12 max-w-[930px] rounded-2xl border border-lime-300/30 bg-black/25 backdrop-blur-md py-4 px-6 shadow-[0_0_40px_rgba(132,204,22,0.08)]">
+            <div className="mt-25 max-w-[930px] rounded-2xl border border-lime-300/30 bg-black/25 backdrop-blur-md py-4 px-6 shadow-[0_0_40px_rgba(132,204,22,0.08)]">
               <div className="flex flex-col md:flex-row md:items-center gap-5">
                 <div className="flex items-center gap-4 flex-1">
                   <div className="shrink-0 h-16 w-16 flex items-center justify-center">
@@ -181,9 +205,7 @@ export function About() {
               <X className="h-6 w-6" />
             </button>
 
-            <p className="text-sm tracking-[0.25em] uppercase text-lime-300 font-semibold mb-4">
-              Área de atuação
-            </p>
+         
 
             <h3 className="font-serif text-3xl font-semibold text-white mb-5 pr-10">
               {selectedSector.title}

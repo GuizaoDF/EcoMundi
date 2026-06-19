@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Mail, MapPin, Loader2, CheckCircle, MessageCircle } from "lucide-react";
+import { Mail, MapPin, Loader2, CheckCircle } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 export function Contact() {
   const [formData, setFormData] = useState({
@@ -74,24 +75,27 @@ export function Contact() {
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center shrink-0">
-                  <MessageCircle className="w-5 h-5 text-green-600" />
-                </div>
-                <div>
-                  <p className="font-medium text-foreground mb-1">WhatsApp</p>
-                  <a
-                    href="https://wa.me/5561991248073?text=Olá! Gostaria de mais informações sobre os serviços da ECO MUNDI."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-green-600 transition-colors"
-                  >
-                    (61) 99124-8073
-                  </a>
-                  <p className="text-xs text-muted-foreground/70 mt-1">
-                    Clique para iniciar uma conversa
-                  </p>
-                </div>
-              </div>
+  <div className="w-12 h-12 bg-[#25D366] rounded-lg flex items-center justify-center shrink-0">
+    <FaWhatsapp className="w-6 h-6 text-white" />
+  </div>
+
+  <div>
+    <p className="font-medium text-foreground mb-1">WhatsApp</p>
+
+    <a
+      href="https://wa.me/5561991248073?text=Olá! Gostaria de mais informações sobre os serviços da ECO MUNDI."
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-muted-foreground hover:text-[#25D366] transition-colors"
+    >
+      (61) 99124-8073
+    </a>
+
+    <p className="text-xs text-muted-foreground/70 mt-1">
+      Clique para iniciar uma conversa
+    </p>
+  </div>
+</div>
 
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">

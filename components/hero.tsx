@@ -70,7 +70,7 @@ export function Hero() {
                   size="lg"
                   className="border-white/50 text-white hover:bg-white/10 px-6 sm:px-8 py-6 text-sm sm:text-base font-medium bg-transparent"
                 >
-                  <Link href="#contato">Fale com um Especialista</Link>
+                  <Link href="#contato">Fale com um Consultor</Link>
                 </Button>
               </div>
             </div>

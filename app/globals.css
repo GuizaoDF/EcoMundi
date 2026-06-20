@@ -150,12 +150,12 @@
     transform: translateX(0);
   }
   to {
-    transform: translateX(-50%);
+    transform: translateX(-33.333%);
   }
 }
 
 .animate-logo-scroll {
-  animation: logo-scroll 28s linear infinite;
+  animation: logo-scroll 34s linear infinite;
 }
 
 .animate-logo-scroll:hover {

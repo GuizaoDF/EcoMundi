@@ -92,31 +92,30 @@ export function About() {
       id="sobre"
       className="relative min-h-screen overflow-hidden scroll-mt-[120px]"
     >
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: "url('/about-bg.png')",
-        }}
-      />
+<div
+  className="absolute inset-0 bg-cover bg-[center_5%] bg-no-repeat brightness-110"
+  style={{
+    backgroundImage: "url('/about-bg.png')",
+  }}
+/>
 
-      <div className="absolute inset-0 bg-gradient-to-r from-[#061a10]/95 via-[#061a10]/58 to-[#061a10]/20" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-black/10" />
-
-      <div className="relative z-10 max-w-[1440px] mx-auto px-6 lg:px-8 pt-12 pb-10">
+<div className="absolute inset-0 bg-gradient-to-r from-[#061a10]/50 via-[#061a10]/60 to-transparent" />
+<div className="absolute inset-0 bg-gradient-to-t from-black/1 via-black/1 to-black/1" />
+      <div className="relative z-10 max-w-[1440px] mx-auto px-6 lg:px-8 pt-20 lg:pt-24 xl:pt-28 pb-10">
         <div className="grid lg:grid-cols-[0.62fr_1.38fr] gap-8 items-start">
           <div className="pt-1">
             <h2 className="font-serif text-3xl sm:text-4xl lg:text-[2.55rem] xl:text-[2.75rem] leading-[1.08] font-semibold text-white max-w-[580px]">
               A Eco Mundi atua junto a instituições{" "}
-              <span className="text-lime-300">públicas ou privadas</span>{" "}
+              <span className="text-emerald-400">públicas ou privadas</span>{" "}
               sujeitas a exigências ambientais, regulatórias e de integridade,
               com foco em{" "}
-              <span className="text-lime-300">
+              <span className="text-emerald-400">
                 conformidade, gestão de riscos e segurança
               </span>{" "}
               para tomada de decisão.
             </h2>
 
-            <div className="mt-6 h-[2px] w-14 bg-lime-300" />
+            <div className="mt-6 h-[2px] w-14 bg-emerald-400" />
 
             <p className="mt-7 max-w-[430px] text-white/90 text-base leading-relaxed">
               Transformamos exigências em estratégia e segurança em vantagem
@@ -135,17 +134,17 @@ export function About() {
                     key={sector.title}
                     type="button"
                     onClick={() => handleOpenSector(sector)}
-                    className={`group text-center px-3 border-r border-lime-300/30 last:border-r-0 ${
+                    className={`group text-center px-3 border-r border-emerald-400/30 last:border-r-0 ${
                       hasDescription ? "cursor-pointer" : "cursor-default"
                     }`}
                   >
-                    <Icon className="mx-auto mb-3 h-16 w-16 xl:h-[4.75rem] xl:w-[4.75rem] text-lime-300 stroke-[1.45] group-hover:scale-110 transition-transform duration-300" />
+                    <Icon className="mx-auto mb-3 h-16 w-16 xl:h-[4.75rem] xl:w-[4.75rem] text-emerald-400 stroke-[1.45] group-hover:scale-110 transition-transform duration-300" />
 
                     <h3 className="min-h-[44px] text-white text-[13px] xl:text-sm font-semibold leading-snug">
                       {sector.title}
                     </h3>
 
-                    <span className="mt-2 inline-flex items-center gap-1 text-lime-300 text-[13px] xl:text-sm font-semibold">
+                    <span className="mt-2 inline-flex items-center gap-1 text-emerald-400 text-[13px] xl:text-sm font-semibold">
                       Saiba mais
                       <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
                     </span>
@@ -163,17 +162,17 @@ export function About() {
                       key={sector.title}
                       type="button"
                       onClick={() => handleOpenSector(sector)}
-                      className={`group text-center px-3 border-r border-lime-300/30 last:border-r-0 ${
+                      className={`group text-center px-3 border-r border-emerald-400/30 last:border-r-0 ${
                         hasDescription ? "cursor-pointer" : "cursor-default"
                       }`}
                     >
-                      <Icon className="mx-auto mb-3 h-16 w-16 xl:h-[4.75rem] xl:w-[4.75rem] text-lime-300 stroke-[1.45] group-hover:scale-110 transition-transform duration-300" />
+                      <Icon className="mx-auto mb-3 h-16 w-16 xl:h-[4.75rem] xl:w-[4.75rem] text-emerald-400 stroke-[1.45] group-hover:scale-110 transition-transform duration-300" />
 
                       <h3 className="min-h-[44px] text-white text-[13px] xl:text-sm font-semibold leading-snug">
                         {sector.title}
                       </h3>
 
-                      <span className="mt-2 inline-flex items-center gap-1 text-lime-300 text-[13px] xl:text-sm font-semibold">
+                      <span className="mt-2 inline-flex items-center gap-1 text-emerald-400 text-[13px] xl:text-sm font-semibold">
                         Saiba mais
                         <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
                       </span>
@@ -183,17 +182,17 @@ export function About() {
               </div>
             </div>
 
-            <div className="mt-25 max-w-[930px] rounded-2xl border border-lime-300/30 bg-black/25 backdrop-blur-md py-4 px-6 shadow-[0_0_40px_rgba(132,204,22,0.08)]">
+            <div className="mt-25 max-w-[930px] rounded-2xl border border-emerald-400/30 bg-black/25 backdrop-blur-md py-4 px-6 shadow-[0_0_40px_rgba(52,211,153,0.08)]">
               <div className="flex flex-col md:flex-row md:items-center gap-5">
                 <div className="flex items-center gap-4 flex-1">
                   <div className="shrink-0 h-16 w-16 flex items-center justify-center">
-                    <ShieldCheck className="h-14 w-14 text-lime-300 stroke-[1.4]" />
+                    <ShieldCheck className="h-14 w-14 text-emerald-400 stroke-[1.4]" />
                   </div>
 
                   <p className="text-white text-lg leading-snug">
                     O maior risco é operar sob a percepção de conformidade sem
                     possuir{" "}
-                    <span className="font-semibold text-lime-300">
+                    <span className="font-semibold text-emerald-400">
                       segurança regulatória.
                     </span>
                   </p>
@@ -201,7 +200,7 @@ export function About() {
 
                 <a
                   href="#contato"
-                  className="inline-flex items-center justify-center gap-3 rounded-xl border border-lime-300/60 bg-lime-700/90 px-6 py-3.5 text-white text-[15px] font-medium hover:bg-lime-600 transition"
+                  className="inline-flex items-center justify-center gap-3 rounded-xl border border-emerald-400/40 bg-emerald-600/90 px-6 py-3.5 text-white text-[15px] font-medium hover:bg-emerald-500 transition"
                 >
                   Diagnóstico Preliminar de Segurança Regulatória
                   <ArrowRight className="h-4 w-4" />
@@ -220,7 +219,7 @@ export function About() {
           <aside
             className="
               fixed right-0 top-0 h-full w-full max-w-xl
-              bg-[#061a10]/95 border-l border-lime-300/30
+              bg-[#061a10]/95 border-l border-emerald-400/30
               shadow-2xl px-7 py-8 md:px-10 md:py-10
               animate-[drawerIn_320ms_ease-out]
             "
@@ -229,14 +228,14 @@ export function About() {
             <button
               type="button"
               onClick={() => setSelectedSector(null)}
-              className="absolute right-6 top-6 text-white/70 hover:text-lime-300 transition"
+              className="absolute right-6 top-6 text-white/70 hover:text-emerald-400 transition"
               aria-label="Fechar"
             >
               <X className="h-7 w-7" />
             </button>
 
             <div className="mt-16">
-              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-lime-300/90">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-emerald-400/90">
                 Saiba mais
               </p>
 
@@ -244,7 +243,7 @@ export function About() {
                 {selectedSector.title}
               </h3>
 
-              <div className="mt-6 h-[2px] w-16 bg-lime-300" />
+              <div className="mt-6 h-[2px] w-16 bg-emerald-400" />
 
               <p className="mt-7 text-white/85 text-lg leading-relaxed">
                 {selectedSector.description}
@@ -254,7 +253,7 @@ export function About() {
                 <button
                   type="button"
                   onClick={() => setSelectedSector(null)}
-                  className="rounded-xl border border-lime-300/50 px-6 py-3.5 text-white font-medium hover:bg-lime-700/50 transition"
+                  className="rounded-xl border border-emerald-400/40 px-6 py-3.5 text-white font-medium hover:bg-emerald-500/50 transition"
                 >
                   Entendi
                 </button>

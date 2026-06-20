@@ -200,8 +200,7 @@ export function About() {
 
                 <a
                   href="#contato"
-                  className="inline-flex items-center justify-center gap-3 rounded-xl border border-emerald-400/40 bg-emerald-600/90 px-6 py-3.5 text-white text-[15px] font-medium hover:bg-emerald-500 transition"
-                >
+                  className="inline-flex items-center justify-center gap-3 rounded-xl bg-primary px-6 py-3.5 text-[15px] font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300 hover:bg-primary/90 hover:-translate-y-0.5" >
                   Diagnóstico Preliminar de Segurança Regulatória
                   <ArrowRight className="h-4 w-4" />
                 </a>

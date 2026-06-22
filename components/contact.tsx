@@ -25,8 +25,8 @@ const offices = [
       "– Asa Sul, Brasília/DF",
     ],
     cep: "70340-908",
-    phone: "(61) 3201-9966",
-    phoneHref: "tel:+556132019966",
+    phone: "(61) 99168-4992",
+    phoneHref: "tel:+5561991684992",
     email: "contatobsb@ecomundi.com.br",
     mapsHref:
       "https://www.google.com/maps/search/?api=1&query=Edifício Embassy Tower SRT Sul Qd 701 Bloco K 701 Conjunto 610 Asa Sul Brasília DF",
@@ -59,8 +59,18 @@ export function Contact() {
     e.preventDefault();
     setStatus("loading");
 
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+    
+    if (!response.ok) {
+      throw new Error("Erro ao enviar mensagem");
+    }
+    
     setStatus("success");
     setFormData({ name: "", email: "", company: "", message: "" });
 
@@ -105,7 +115,7 @@ export function Contact() {
 
             <div className="space-y-7 max-w-3xl">
               <a
-                href="https://wa.me/5561991248073?text=Olá! Gostaria de mais informações sobre os serviços da ECO MUNDI."
+                href="https://wa.me/5561991684992?text=Olá! Gostaria de mais informações sobre os serviços da ECO MUNDI."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group rounded-2xl border border-[#25D366]/20 bg-gradient-to-r from-[#25D366]/10 to-primary/10 p-5 sm:p-6 flex items-center justify-between gap-5 shadow-sm hover:shadow-md transition-all"

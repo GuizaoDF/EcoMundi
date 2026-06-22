@@ -19,10 +19,11 @@ const footerLinks = {
     { label: "Consultoria ESG", href: "#atuacao" },
     { label: "Due Diligence", href: "#atuacao" },
     { label: "Regularização Fundiária", href: "#atuacao" },
+    { label: "Gestão Ambiental", href: "#atuacao" },
   ],
   contato: [
     { label: "contato@ecomundi.com.br", href: "mailto:contato@ecomundi.com.br" },
-    { label: "WhatsApp: (61) 99124-8073", href: "https://wa.me/5561991248073" },
+    { label: "WhatsApp: (61) 99168-4992", href: "https://wa.me/5561991684992" },
     { label: "Brasília - DF", href: "#contato" },
   ],
 };

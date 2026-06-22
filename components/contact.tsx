@@ -121,7 +121,7 @@ export function Contact() {
                     </p>
 
                     <p className="text-lg font-semibold text-foreground">
-                      (61) 99124-8073
+                      (61) 99168-4992
                     </p>
 
                     <p className="text-xs text-muted-foreground/70 mt-1">

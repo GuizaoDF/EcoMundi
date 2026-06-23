@@ -1,68 +1,49 @@
 // components/Clientes.tsx
 
-"use client";
-
-import { useState } from "react";
 import {
   Building2,
-  CalendarCheck,
-  MousePointerClick,
   Leaf,
   MapPinned,
   Network,
-  Quote,
   Users,
-  X,
 } from "lucide-react";
 
 const clientes = [
   {
-    nome: "Verde Nova",
+    nome: "Cliente 1",
     logo: "/clientes/cliente-1.png",
-    segmento: "Soluções ambientais",
-    localizacao: "Atuação nacional",
-    parceria: "Parceria desde 2022",
-    depoimento:
-      "A atuação da Eco Mundi trouxe segurança regulatória e clareza técnica fundamentais para a tomada de decisões estratégicas da nossa organização.",
-    desafio:
-      "Estruturar a governança ambiental e garantir conformidade legal em um cenário regulatório complexo.",
-    atuacao:
-      "Diagnóstico ambiental, mapeamento de riscos, adequação regulatória e suporte técnico contínuo.",
-    resultado:
-      "Maior previsibilidade regulatória, redução de passivos e fortalecimento da sustentabilidade corporativa.",
-    responsavel: "Diretoria Executiva",
   },
   {
-    nome: "Construtiva",
+    nome: "Cliente 2",
     logo: "/clientes/cliente-2.png",
-    segmento: "Engenharia e infraestrutura",
-    localizacao: "Projetos estratégicos",
-    parceria: "Parceria institucional",
-    depoimento:
-      "A Eco Mundi demonstrou visão integrada entre técnica, regulação e estratégia, apoiando decisões críticas com segurança.",
-    desafio:
-      "Apoiar projetos de infraestrutura sujeitos a licenciamento, condicionantes e obrigações ambientais.",
-    atuacao:
-      "Planejamento regulatório, suporte em processos administrativos e organização de requisitos ambientais.",
-    resultado:
-      "Mais segurança para execução dos projetos e redução de riscos operacionais e reputacionais.",
-    responsavel: "Coordenação de Projetos",
   },
   {
-    nome: "Águas Claras",
+    nome: "Cliente 3",
     logo: "/clientes/cliente-3.png",
-    segmento: "Saneamento e meio ambiente",
-    localizacao: "Gestão ambiental",
-    parceria: "Atuação técnica",
-    depoimento:
-      "O suporte da Eco Mundi agregou organização, visão estratégica e segurança jurídica aos processos ambientais.",
-    desafio:
-      "Aprimorar controles ambientais e apoiar a gestão de riscos regulatórios em operações sensíveis.",
-    atuacao:
-      "Monitoramento de obrigações, análise de conformidade, suporte técnico-jurídico e gestão de riscos.",
-    resultado:
-      "Processos mais organizados, maior aderência regulatória e melhor capacidade de resposta institucional.",
-    responsavel: "Gerência de Sustentabilidade",
+  },
+  {
+    nome: "Cliente 4",
+    logo: "/clientes/cliente-4.png",
+  },
+  {
+    nome: "Cliente 5",
+    logo: "/clientes/cliente-5.png",
+  },
+  {
+    nome: "Cliente 6",
+    logo: "/clientes/cliente-6.png",
+  },
+  {
+    nome: "Cliente 7",
+    logo: "/clientes/cliente-7.png",
+  },
+  {
+    nome: "Cliente 8",
+    logo: "/clientes/cliente-8.png",
+  },
+  {
+    nome: "Cliente 9",
+    logo: "/clientes/cliente-9.png",
   },
 ];
 
@@ -90,9 +71,6 @@ const indicadores = [
 ];
 
 export function Clientes() {
-  const [clienteSelecionado, setClienteSelecionado] =
-    useState<(typeof clientes)[0] | null>(null);
-
   const logos = [...clientes, ...clientes, ...clientes];
 
   return (
@@ -141,7 +119,9 @@ export function Clientes() {
                   <p className="font-serif text-2xl text-[#06351f]">
                     {item.destaque}
                   </p>
-                  <p className="mt-1 text-sm text-neutral-600">{item.texto}</p>
+                  <p className="mt-1 text-sm text-neutral-600">
+                    {item.texto}
+                  </p>
                 </div>
               </div>
             );
@@ -155,147 +135,19 @@ export function Clientes() {
 
         <div className="flex w-max animate-logo-scroll items-center gap-5 sm:gap-6 px-4">
           {logos.map((cliente, index) => (
-            <button
+            <div
               key={`${cliente.nome}-${index}`}
-              type="button"
-              onClick={() => setClienteSelecionado(cliente)}
-              className="group relative flex h-32 w-64 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-[#06351f]/10 bg-white/90 px-8 shadow-[0_12px_35px_rgba(0,0,0,0.06)] transition-all duration-500 hover:-translate-y-1 hover:border-[#0b5f3a]/25 hover:bg-white hover:shadow-[0_18px_45px_rgba(0,0,0,0.10)]"
+              className="flex h-32 w-64 shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-[#06351f]/10 bg-white/90 px-8 shadow-[0_12px_35px_rgba(0,0,0,0.06)]"
             >
               <img
                 src={cliente.logo}
                 alt={cliente.nome}
-                className="max-h-24 max-w-[90%] object-contain opacity-95 transition-all duration-500 group-hover:scale-105 group-hover:opacity-100"
+                className="max-h-24 max-w-[90%] object-contain opacity-95"
               />
-
-              <div className="absolute inset-0 flex items-center justify-center rounded-3xl bg-[#06351f]/88 opacity-0 transition-all duration-300 group-hover:opacity-100">
-                <span className="text-sm font-medium text-white">
-                  Conheça o case
-                </span>
-              </div>
-            </button>
+            </div>
           ))}
         </div>
       </div>
-
-      <div className="relative mt-6 flex items-center justify-center gap-2 text-sm text-[#06351f]/80">
-        <MousePointerClick className="h-4 w-4" />
-        <span>Clique em uma marca para conhecer o case</span>
-      </div>
-
-      {clienteSelecionado && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <button
-            type="button"
-            aria-label="Fechar case"
-            className="absolute inset-0 bg-black/55 backdrop-blur-sm"
-            onClick={() => setClienteSelecionado(null)}
-          />
-
-          <div className="relative w-full max-w-5xl rounded-[2rem] bg-white p-5 shadow-2xl">
-            <button
-              type="button"
-              aria-label="Fechar"
-              onClick={() => setClienteSelecionado(null)}
-              className="absolute right-6 top-6 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#06351f] shadow-md transition hover:scale-105"
-            >
-              <X className="h-5 w-5" />
-            </button>
-
-            <div className="grid gap-8 rounded-[1.6rem] bg-gradient-to-br from-white to-[#edf5ef] p-6 sm:p-8 lg:grid-cols-[0.85fr_1.4fr_0.75fr]">
-              <div className="rounded-3xl bg-[#edf5ef] p-6">
-                <div className="flex h-32 items-center justify-center">
-                  <img
-                    src={clienteSelecionado.logo}
-                    alt={clienteSelecionado.nome}
-                    className="max-h-24 max-w-full object-contain"
-                  />
-                </div>
-
-                <div className="mt-8 space-y-5 text-sm text-neutral-700">
-                  <div className="flex gap-3">
-                    <Leaf className="mt-0.5 h-5 w-5 text-[#0b5f3a]" />
-                    <div>
-                      <p className="font-medium text-[#06351f]">Segmento</p>
-                      <p>{clienteSelecionado.segmento}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <MapPinned className="mt-0.5 h-5 w-5 text-[#0b5f3a]" />
-                    <div>
-                      <p className="font-medium text-[#06351f]">Atuação</p>
-                      <p>{clienteSelecionado.localizacao}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-3">
-                    <CalendarCheck className="mt-0.5 h-5 w-5 text-[#0b5f3a]" />
-                    <div>
-                      <p className="font-medium text-[#06351f]">Relação</p>
-                      <p>{clienteSelecionado.parceria}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="py-2">
-                <Quote className="h-9 w-9 text-[#0b5f3a]" />
-
-                <p className="mt-4 font-serif text-xl sm:text-2xl leading-relaxed text-[#06351f]">
-                  {clienteSelecionado.depoimento}
-                </p>
-
-                <div className="mt-7 h-px w-36 bg-[#0b5f3a]/35" />
-
-                <div className="mt-6 space-y-5">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#0b5f3a]">
-                      Desafio
-                    </p>
-                    <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-                      {clienteSelecionado.desafio}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#0b5f3a]">
-                      Atuação da Eco Mundi
-                    </p>
-                    <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-                      {clienteSelecionado.atuacao}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#0b5f3a]">
-                      Resultado
-                    </p>
-                    <p className="mt-2 text-sm leading-relaxed text-neutral-600">
-                      {clienteSelecionado.resultado}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-center rounded-3xl bg-[#edf5ef] p-6 text-center">
-                <div>
-                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[#0b5f3a]/40 text-[#0b5f3a]">
-                    <Quote className="h-8 w-8" />
-                  </div>
-
-                  <p className="mt-6 text-sm font-medium text-[#06351f]">
-                    {clienteSelecionado.responsavel}
-                  </p>
-
-                  <p className="mt-1 text-xs text-neutral-500">
-                    {clienteSelecionado.nome}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   );
 }

@@ -22,7 +22,7 @@ const footerLinks = {
     { label: "Gestão Ambiental", href: "#atuacao" },
   ],
   contato: [
-    { label: "contato@ecomundi.com.br", href: "mailto:contato@ecomundi.com.br" },
+    { label: "contatobsb@ecomundi.com.br", href: "mailto:contatobsb@ecomundi.com.br" },
     { label: "WhatsApp: (61) 99168-4992", href: "https://wa.me/5561991684992" },
     { label: "Brasília - DF", href: "#contato" },
   ],
@@ -35,7 +35,7 @@ const socialLinks = [
     label: "LinkedIn",
   },
   { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
-  { icon: Mail, href: "mailto:contato@ecomundi.com.br", label: "E-mail" },
+  { icon: Mail, href: "mailto:contatobsb@ecomundi.com.br", label: "E-mail" },
 ];
 
 export function Footer() {
@@ -334,10 +334,10 @@ function PrivacyContent() {
         </p>
 
         <a
-          href="mailto:contato@ecomundi.com.br"
+          href="mailto:contatobsb@ecomundi.com.br"
           className="mt-2 inline-block font-medium text-primary hover:underline"
         >
-          contato@ecomundi.com.br
+          contatobsb@ecomundi.com.br
         </a>
       </section>
     </div>
@@ -464,10 +464,10 @@ function TermsContent() {
         </p>
 
         <a
-          href="mailto:contato@ecomundi.com.br"
+          href="mailto:contatobsb@ecomundi.com.br"
           className="mt-2 inline-block font-medium text-primary hover:underline"
         >
-          contato@ecomundi.com.br
+          contatobsb@ecomundi.com.br
         </a>
       </section>
     </div>

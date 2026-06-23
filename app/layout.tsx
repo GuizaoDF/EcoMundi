@@ -18,23 +18,19 @@ export const metadata: Metadata = {
   title: 'ECO MUNDI | Consultoria e Gestão Ambiental',
   description: 'Consultoria especializada em direito ambiental, governança regulatória, consultoria ESG, due diligence ambiental e estruturação de negócios sustentáveis.',
   generator: 'v0.app',
-  keywords: ['direito ambiental', 'advocacia ambiental', 'ESG', 'sustentabilidade', 'consultoria ambiental', 'due diligence', 'regularização fundiária'],
+  keywords: [
+    'direito ambiental',
+    'advocacia ambiental',
+    'ESG',
+    'sustentabilidade',
+    'consultoria ambiental',
+    'due diligence',
+    'regularização fundiária'
+  ],
   icons: {
     icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
+      { url: "/icon-light-32x32.png", sizes: "32x32", type: "image/png" },
     ],
-    apple: '/apple-icon.png',
   },
 }
 

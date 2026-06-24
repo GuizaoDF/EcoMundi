@@ -36,7 +36,7 @@ export async function POST(req: Request) {
                   <tr>
                     <td style="background:#ffffff;padding:32px;text-align:center;border-bottom:4px solid #0f3d2e;">
                       <img
-                        src="https://eco-mundi.vercel.app/logo.png"
+                        src="https://ecomundi.com.br/logo.png"
                         alt="ECO MUNDI"
                         style="max-width:420px;width:100%;height:auto;display:block;margin:0 auto;"
                       />

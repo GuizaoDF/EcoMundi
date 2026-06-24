@@ -14,7 +14,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 }
 
 export function WhatsAppButton() {
-  const phoneNumber = "5561991248073";
+  const phoneNumber = "5561991684992";
   const message = "Olá! Gostaria de mais informações sobre os serviços da ECO MUNDI.";
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 

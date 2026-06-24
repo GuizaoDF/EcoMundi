@@ -1,21 +1,30 @@
-import { Resend } from "resend";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import nodemailer from "nodemailer";
 
 export async function POST(req: Request) {
   try {
     const { name, email, company, message } = await req.json();
 
-    await resend.emails.send({
-      from: "onboarding@resend.dev",
-      to: "guilherme.mendes.monteiro@gmail.com",
+    const transporter = nodemailer.createTransport({
+      host: process.env.EMAIL_HOST,
+      port: Number(process.env.EMAIL_PORT),
+      secure: true,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    await transporter.sendMail({
+      from: `"Site Eco Mundi" <${process.env.EMAIL_USER}>`,
+      to: process.env.EMAIL_TO,
+      replyTo: email,
       subject: "Novo contato pelo site",
       html: `
         <h2>Novo contato recebido</h2>
 
         <p><strong>Nome:</strong> ${name}</p>
         <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Empresa:</strong> ${company}</p>
+        <p><strong>Empresa:</strong> ${company || "Não informado"}</p>
         <p><strong>Mensagem:</strong></p>
 
         <p>${message}</p>
@@ -24,7 +33,7 @@ export async function POST(req: Request) {
 
     return Response.json({ success: true });
   } catch (error) {
-    console.error(error);
+    console.error("Erro ao enviar e-mail:", error);
 
     return Response.json(
       { success: false },

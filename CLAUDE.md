@@ -4,11 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
+This project uses **pnpm**. Always use `pnpm` (not `npm`) to install packages.
+
 ```bash
-npm run dev       # Start development server
-npm run build     # Production build (TypeScript errors are ignored — see next.config.mjs)
-npm run start     # Start production server
-npm run lint      # Run ESLint
+pnpm dev          # Start development server
+pnpm build        # Production build (TypeScript errors are ignored — see next.config.mjs)
+pnpm start        # Start production server
+pnpm lint         # Run ESLint
+pnpm add <pkg>    # Install a new package
 ```
 
 There are no tests in this project.

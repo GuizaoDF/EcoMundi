@@ -261,7 +261,7 @@ export function Contact() {
             </div>
           </div>
 
-          <div className="bg-white/90 p-7 sm:p-9 lg:p-10 rounded-2xl border border-border shadow-sm lg:sticky lg:top-28">
+          <div className="bg-white/90 p-7 sm:p-9 lg:p-10 rounded-2xl border border-border shadow-sm lg:sticky lg:top-28 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
             {status === "success" ? (
               <div className="h-full min-h-[600px] flex flex-col items-center justify-center text-center py-12">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
@@ -324,11 +324,9 @@ export function Contact() {
                           : ""
                       }`}
                     />
-                    {emailError && (
-                      <p className="text-xs text-red-500 flex items-center gap-1">
-                        <span>⚠</span> {emailError}
-                      </p>
-                    )}
+                    <p className={`text-xs flex items-center gap-1 min-h-[1rem] ${emailError ? "text-red-500" : "invisible"}`}>
+                      <span>⚠</span> {emailError || " "}
+                    </p>
                   </div>
                 </div>
 

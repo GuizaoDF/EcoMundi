@@ -9,15 +9,24 @@ export function Newsletter() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [emailError, setEmailError] = useState("");
+
+  function validateFormat(value: string) {
+    if (!value) return "Por favor, insira seu e-mail.";
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)
+      ? ""
+      : "Digite um e-mail válido (ex: nome@dominio.com)";
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email) {
-      setStatus("error");
-      setMessage("Por favor, insira seu e-mail.");
+    const err = validateFormat(email);
+    if (err) {
+      setEmailError(err);
       return;
     }
+    setEmailError("");
 
     try {
       setStatus("loading");
@@ -25,16 +34,16 @@ export function Newsletter() {
 
       const response = await fetch("/api/newsletter", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Erro ao realizar inscrição.");
+        setStatus("error");
+        setMessage(data.message || "Erro ao realizar inscrição.");
+        return;
       }
 
       setStatus("success");
@@ -44,14 +53,10 @@ export function Newsletter() {
       setTimeout(() => {
         setStatus("idle");
         setMessage("");
-      }, 3000);
-    } catch (error) {
+      }, 4000);
+    } catch {
       setStatus("error");
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "Erro ao realizar inscrição."
-      );
+      setMessage("Erro de conexão. Tente novamente.");
     }
   };
 
@@ -74,35 +79,50 @@ export function Newsletter() {
               <span className="font-medium">{message}</span>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-              <Input
-                type="email"
-                placeholder="Seu melhor e-mail"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="flex-1 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50 focus:border-primary-foreground/40"
-                disabled={status === "loading"}
-              />
+            <div className="max-w-md mx-auto">
+              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1">
+                  <Input
+                    type="email"
+                    placeholder="Seu melhor e-mail"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (emailError) setEmailError(validateFormat(e.target.value));
+                    }}
+                    className={`bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50 focus:border-primary-foreground/40 ${
+                      emailError ? "border-red-400" : ""
+                    }`}
+                    disabled={status === "loading"}
+                  />
+                </div>
 
-              <Button
-                type="submit"
-                disabled={status === "loading"}
-                className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium px-8"
-              >
-                {status === "loading" ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  "Inscrever-se"
-                )}
-              </Button>
-            </form>
-          )}
+                <Button
+                  type="submit"
+                  disabled={status === "loading"}
+                  className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-medium px-8 shrink-0"
+                >
+                  {status === "loading" ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    "Inscrever-se"
+                  )}
+                </Button>
+              </form>
 
-          {status === "error" && (
-            <p className="mt-3 text-sm text-red-200">{message}</p>
+              {emailError && (
+                <p className="mt-2 text-sm text-red-300 flex items-center gap-1">
+                  <span>⚠</span> {emailError}
+                </p>
+              )}
+
+              {status === "error" && !emailError && (
+                <p className="mt-2 text-sm text-red-300">{message}</p>
+              )}
+            </div>
           )}
 
           <p className="mt-6 text-sm text-primary-foreground/60">

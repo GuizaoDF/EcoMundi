@@ -1,5 +1,6 @@
 import nodemailer from "nodemailer";
 import db from "@/lib/db";
+import { isValidFormat, isValidMx } from "@/lib/email-validator";
 
 function escapeHtml(value: string) {
   return value
@@ -16,10 +17,22 @@ export async function POST(req: Request) {
 
     if (!name || !email || !message) {
       return Response.json(
-        {
-          success: false,
-          message: "Nome, e-mail e mensagem são obrigatórios.",
-        },
+        { success: false, message: "Nome, e-mail e mensagem são obrigatórios." },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidFormat(email)) {
+      return Response.json(
+        { success: false, message: "Endereço de e-mail inválido." },
+        { status: 400 }
+      );
+    }
+
+    const mxValido = await isValidMx(email);
+    if (!mxValido) {
+      return Response.json(
+        { success: false, message: "O domínio deste e-mail não existe ou não aceita mensagens." },
         { status: 400 }
       );
     }

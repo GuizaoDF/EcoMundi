@@ -1,17 +1,50 @@
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
+import { isValidFormat, isValidMx } from "@/lib/email-validator";
 
-function isValidEmail(email: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+export async function GET() {
+  try {
+    const [rows] = await db.execute(`
+      SELECT
+        id,
+        email,
+        criado_em AS createdAt
+      FROM newsletter
+      ORDER BY criado_em DESC
+    `);
+
+    return NextResponse.json({
+      success: true,
+      data: rows,
+    });
+  } catch (error) {
+    console.error("Erro ao listar newsletter:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Erro ao listar newsletter.",
+      },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();
 
-    if (!email || !isValidEmail(email)) {
+    if (!email || !isValidFormat(email)) {
       return NextResponse.json(
-        { success: false, message: "E-mail inválido." },
+        { success: false, message: "Endereço de e-mail inválido." },
+        { status: 400 }
+      );
+    }
+
+    const mxValido = await isValidMx(email);
+    if (!mxValido) {
+      return NextResponse.json(
+        { success: false, message: "O domínio deste e-mail não existe ou não aceita mensagens." },
         { status: 400 }
       );
     }

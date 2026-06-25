@@ -51,41 +51,74 @@ export function Contact() {
     message: "",
   });
 
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [emailTouched, setEmailTouched] = useState(false);
+
+  function validateEmailFormat(value: string) {
+    if (!value) return "";
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)
+      ? ""
+      : "Digite um e-mail válido (ex: nome@dominio.com)";
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStatus("loading");
 
-    const response = await fetch("/api/contact", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-    
-    if (!response.ok) {
-      throw new Error("Erro ao enviar mensagem");
+    const formatError = validateEmailFormat(formData.email);
+    if (formatError) {
+      setEmailError(formatError);
+      setEmailTouched(true);
+      return;
     }
-    
-    setStatus("success");
-    setFormData({ name: "", email: "", company: "", message: "" });
 
-    setTimeout(() => {
+    setStatus("loading");
+    setErrorMessage("");
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.message?.includes("e-mail") || data.message?.includes("domínio")) {
+          setEmailError(data.message);
+          setEmailTouched(true);
+        } else {
+          setErrorMessage(data.message || "Erro ao enviar mensagem.");
+        }
+        setStatus("idle");
+        return;
+      }
+
+      setStatus("success");
+      setFormData({ name: "", email: "", company: "", message: "" });
+      setEmailError("");
+      setEmailTouched(false);
+    } catch {
+      setErrorMessage("Erro de conexão. Tente novamente.");
       setStatus("idle");
-    }, 3000);
+    }
   };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (name === "email" && emailTouched) {
+      setEmailError(validateEmailFormat(value));
+    }
+  };
+
+  const handleEmailBlur = () => {
+    setEmailTouched(true);
+    setEmailError(validateEmailFormat(formData.email));
   };
 
   return (
@@ -280,10 +313,22 @@ export function Contact() {
                       placeholder="seu@email.com"
                       value={formData.email}
                       onChange={handleChange}
+                      onBlur={handleEmailBlur}
                       required
                       disabled={status === "loading"}
-                      className="h-12 bg-white"
+                      className={`h-12 bg-white transition-colors ${
+                        emailError
+                          ? "border-red-400 focus-visible:ring-red-300"
+                          : emailTouched && !emailError && formData.email
+                          ? "border-green-400 focus-visible:ring-green-300"
+                          : ""
+                      }`}
                     />
+                    {emailError && (
+                      <p className="text-xs text-red-500 flex items-center gap-1">
+                        <span>⚠</span> {emailError}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -316,11 +361,17 @@ export function Contact() {
                   />
                 </div>
 
+                {errorMessage && (
+                  <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
+                    {errorMessage}
+                  </p>
+                )}
+
                 <Button
                   type="submit"
                   size="lg"
                   className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
-                  disabled={status === "loading"}
+                  disabled={status === "loading" || !!emailError}
                 >
                   {status === "loading" ? (
                     <>

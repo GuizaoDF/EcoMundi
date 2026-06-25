@@ -33,52 +33,37 @@ function emailHtml(noticia: {
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7f5f0;padding:40px 20px;">
     <tr>
       <td align="center">
-        <table width="620" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e0d8;max-width:620px;">
+        <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e0d8;">
 
           <!-- Cabeçalho -->
           <tr>
-            <td style="background:#0f3d2e;padding:28px 32px;text-align:center;">
-              <img src="https://ecomundi.com.br/logo.png" alt="ECO MUNDI" width="180" style="height:auto;display:block;margin:0 auto;filter:brightness(0) invert(1);" />
-            </td>
-          </tr>
-
-          <!-- Tag -->
-          <tr>
-            <td style="background:#f7f5f0;padding:14px 32px;border-bottom:1px solid #e5e0d8;">
-              <span style="display:inline-block;background:#0f3d2e;color:#ffffff;font-size:11px;font-weight:bold;letter-spacing:0.1em;padding:4px 12px;border-radius:20px;text-transform:uppercase;">
-                Nova publicação
-              </span>
+            <td style="background:#ffffff;padding:22px;text-align:center;border-bottom:4px solid #0f3d2e;">
+              <img src="https://ecomundi.com.br/logo.png" alt="ECO MUNDI" width="200" style="max-width:200px;width:200px;height:auto;display:block;margin:0 auto;" />
             </td>
           </tr>
 
           <!-- Conteúdo -->
           <tr>
-            <td style="padding:36px 32px;">
+            <td style="padding:36px 36px 28px 36px;">
+              <span style="display:inline-block;background:#0f3d2e;color:#ffffff;font-size:11px;font-weight:bold;letter-spacing:0.1em;padding:4px 12px;border-radius:20px;text-transform:uppercase;margin-bottom:20px;">
+                Nova publicação
+              </span>
               <p style="margin:0 0 8px 0;font-size:13px;color:#9ca3af;">${data}</p>
-              <h1 style="margin:0 0 20px 0;font-size:26px;line-height:1.35;color:#0f3d2e;font-family:Georgia,serif;">${titulo}</h1>
-              ${resumo ? `<p style="margin:0 0 28px 0;font-size:16px;line-height:1.75;color:#4b5563;border-left:3px solid #0f3d2e;padding-left:16px;">${resumo}</p>` : ""}
+              <h1 style="margin:0 0 20px 0;font-size:24px;line-height:1.35;color:#0f3d2e;font-family:Georgia,serif;">${titulo}</h1>
+              ${resumo ? `<p style="margin:0 0 28px 0;font-size:15px;line-height:1.75;color:#555555;border-left:3px solid #0f3d2e;padding-left:16px;">${resumo}</p>` : ""}
               <div style="text-align:center;margin-top:8px;">
-                <a href="${url}" style="display:inline-block;background:#0f3d2e;color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:10px;font-weight:bold;font-size:15px;">
+                <a href="${url}" style="display:inline-block;background:#0f3d2e;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:10px;font-weight:bold;font-size:15px;">
                   Ler artigo completo →
                 </a>
               </div>
             </td>
           </tr>
 
-          <!-- Divisor -->
-          <tr>
-            <td style="padding:0 32px;"><div style="border-top:1px solid #e5e0d8;"></div></td>
-          </tr>
-
           <!-- Rodapé -->
           <tr>
-            <td style="background:#f7f5f0;padding:22px 32px;text-align:center;">
-              <p style="margin:0 0 6px 0;font-size:13px;color:#6b7280;">
-                Você recebe este e-mail por estar inscrito na newsletter da <strong>ECO MUNDI</strong>.
-              </p>
-              <p style="margin:0;font-size:12px;color:#9ca3af;">
-                Para cancelar sua inscrição, responda este e-mail com o assunto "Descadastrar".
-              </p>
+            <td style="background:#f1eee8;padding:18px 36px;text-align:center;font-size:12px;color:#888888;line-height:1.6;">
+              Você recebe este e-mail por estar inscrito na newsletter da <strong>ECO MUNDI</strong>.<br/>
+              Para cancelar sua inscrição, responda este e-mail com o assunto "Descadastrar".
             </td>
           </tr>
 

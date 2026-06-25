@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CheckCircle, Loader2 } from "lucide-react";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 
 export function Newsletter() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
   const [emailError, setEmailError] = useState("");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptcha>(null);
 
   function validateFormat(value: string) {
     if (!value) return "Por favor, insira seu e-mail.";
@@ -28,6 +31,12 @@ export function Newsletter() {
     }
     setEmailError("");
 
+    if (!captchaToken) {
+      setStatus("error");
+      setMessage("Por favor, complete a verificação de segurança.");
+      return;
+    }
+
     try {
       setStatus("loading");
       setMessage("");
@@ -35,10 +44,13 @@ export function Newsletter() {
       const response = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, hcaptchaToken: captchaToken }),
       });
 
       const data = await response.json();
+
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
 
       if (!response.ok) {
         setStatus("error");
@@ -55,6 +67,8 @@ export function Newsletter() {
         setMessage("");
       }, 4000);
     } catch {
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
       setStatus("error");
       setMessage("Erro de conexão. Tente novamente.");
     }
@@ -122,6 +136,16 @@ export function Newsletter() {
               {status === "error" && !emailError && (
                 <p className="mt-2 text-sm text-red-300">{message}</p>
               )}
+
+              <div className="mt-4 flex justify-center">
+                <HCaptcha
+                  ref={captchaRef}
+                  sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+                  onVerify={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken(null)}
+                  theme="dark"
+                />
+              </div>
             </div>
           )}
 

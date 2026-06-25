@@ -1,6 +1,7 @@
 import nodemailer from "nodemailer";
 import db from "@/lib/db";
 import { isValidFormat, isValidMx } from "@/lib/email-validator";
+import { verifyHcaptcha } from "@/lib/hcaptcha";
 
 function escapeHtml(value: string) {
   return value
@@ -13,7 +14,14 @@ function escapeHtml(value: string) {
 
 export async function POST(req: Request) {
   try {
-    const { name, email, company, message } = await req.json();
+    const { name, email, company, message, hcaptchaToken } = await req.json();
+
+    if (!hcaptchaToken || !(await verifyHcaptcha(hcaptchaToken))) {
+      return Response.json(
+        { success: false, message: "Verificação de segurança inválida." },
+        { status: 400 }
+      );
+    }
 
     if (!name || !email || !message) {
       return Response.json(

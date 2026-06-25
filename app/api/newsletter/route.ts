@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import db from "@/lib/db";
 import { isValidFormat, isValidMx } from "@/lib/email-validator";
+import { verifyHcaptcha } from "@/lib/hcaptcha";
 
 export async function GET() {
   try {
@@ -33,7 +34,14 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { email } = await req.json();
+    const { email, hcaptchaToken } = await req.json();
+
+    if (!hcaptchaToken || !(await verifyHcaptcha(hcaptchaToken))) {
+      return NextResponse.json(
+        { success: false, message: "Verificação de segurança inválida." },
+        { status: 400 }
+      );
+    }
 
     if (!email || !isValidFormat(email)) {
       return NextResponse.json(

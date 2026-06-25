@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -55,6 +56,8 @@ export function Contact() {
   const [errorMessage, setErrorMessage] = useState("");
   const [emailError, setEmailError] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptcha>(null);
 
   function validateEmailFormat(value: string) {
     if (!value) return "";
@@ -73,6 +76,11 @@ export function Contact() {
       return;
     }
 
+    if (!captchaToken) {
+      setErrorMessage("Por favor, complete a verificação de segurança.");
+      return;
+    }
+
     setStatus("loading");
     setErrorMessage("");
 
@@ -80,10 +88,13 @@ export function Contact() {
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, hcaptchaToken: captchaToken }),
       });
 
       const data = await response.json();
+
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
 
       if (!response.ok) {
         if (data.message?.includes("e-mail") || data.message?.includes("domínio")) {
@@ -101,6 +112,8 @@ export function Contact() {
       setEmailError("");
       setEmailTouched(false);
     } catch {
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
       setErrorMessage("Erro de conexão. Tente novamente.");
       setStatus("idle");
     }
@@ -359,6 +372,13 @@ export function Contact() {
                   />
                 </div>
 
+                <HCaptcha
+                  ref={captchaRef}
+                  sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+                  onVerify={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken(null)}
+                />
+
                 {errorMessage && (
                   <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
                     {errorMessage}
@@ -369,7 +389,7 @@ export function Contact() {
                   type="submit"
                   size="lg"
                   className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
-                  disabled={status === "loading" || !!emailError}
+                  disabled={status === "loading" || !!emailError || !captchaToken}
                 >
                   {status === "loading" ? (
                     <>

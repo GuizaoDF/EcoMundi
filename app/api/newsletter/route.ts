@@ -59,13 +59,18 @@ export async function POST(req: Request) {
       );
     }
 
-    await db.execute(
-      `
-        INSERT INTO newsletter (email)
-        VALUES (?)
-      `,
+    const [result]: any = await db.execute(
+      `INSERT INTO newsletter (email, ativo) VALUES (?, 1)
+       ON DUPLICATE KEY UPDATE ativo = IF(ativo = 0, 1, ativo)`,
       [email]
     );
+
+    if (result.affectedRows === 0) {
+      return NextResponse.json(
+        { success: false, message: "Este e-mail já está cadastrado." },
+        { status: 409 }
+      );
+    }
 
     const unsubToken = await generateUnsubscribeToken(email);
     const siteUrl = process.env.SITE_URL ?? "https://ecomundi.com.br";
@@ -153,13 +158,6 @@ export async function POST(req: Request) {
       message: "Inscrição realizada com sucesso!",
     });
   } catch (error: any) {
-    if (error?.code === "ER_DUP_ENTRY") {
-      return NextResponse.json(
-        { success: false, message: "Este e-mail já está cadastrado." },
-        { status: 409 }
-      );
-    }
-
     console.error("Erro ao cadastrar newsletter:", error);
 
     return NextResponse.json(

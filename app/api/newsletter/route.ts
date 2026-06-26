@@ -59,17 +59,23 @@ export async function POST(req: Request) {
       );
     }
 
-    const [result]: any = await db.execute(
-      `INSERT INTO newsletter (email, ativo) VALUES (?, 1)
-       ON DUPLICATE KEY UPDATE ativo = IF(ativo = 0, 1, ativo)`,
+    const [existing]: any = await db.execute(
+      "SELECT id, ativo FROM newsletter WHERE email = ?",
       [email]
     );
 
-    if (result.affectedRows === 0) {
-      return NextResponse.json(
-        { success: false, message: "Este e-mail já está cadastrado." },
-        { status: 409 }
-      );
+    const existingRow = (existing as any[])[0];
+
+    if (existingRow) {
+      if (existingRow.ativo === 1) {
+        return NextResponse.json(
+          { success: false, message: "Este e-mail já está cadastrado." },
+          { status: 409 }
+        );
+      }
+      await db.execute("UPDATE newsletter SET ativo = 1 WHERE email = ?", [email]);
+    } else {
+      await db.execute("INSERT INTO newsletter (email) VALUES (?)", [email]);
     }
 
     const unsubToken = await generateUnsubscribeToken(email);

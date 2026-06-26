@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import nodemailer from "nodemailer";
 import db from "@/lib/db";
 import { getSession } from "@/lib/auth";
+import { generateUnsubscribeToken } from "@/lib/unsubscribe-token";
 
 function escapeHtml(v: string) {
   return v
@@ -16,7 +17,7 @@ function emailHtml(noticia: {
   resumo: string | null;
   slug: string;
   criado_em: string;
-}) {
+}, unsubscribeUrl: string) {
   const titulo = escapeHtml(noticia.titulo);
   const resumo = noticia.resumo ? escapeHtml(noticia.resumo) : "";
   const data = new Date(noticia.criado_em).toLocaleDateString("pt-BR", {
@@ -63,7 +64,7 @@ function emailHtml(noticia: {
           <tr>
             <td style="background:#f1eee8;padding:18px 36px;text-align:center;font-size:12px;color:#888888;line-height:1.6;">
               Você recebe este e-mail por estar inscrito na newsletter da <strong>ECO MUNDI</strong>.<br/>
-              Para cancelar sua inscrição, responda este e-mail com o assunto "Descadastrar".
+              Para cancelar sua inscrição, <a href="${unsubscribeUrl}" style="color:#0f3d2e;text-decoration:underline;">clique aqui</a>.
             </td>
           </tr>
 
@@ -77,16 +78,15 @@ function emailHtml(noticia: {
 
 async function enviarEmLotes(
   transporter: nodemailer.Transporter,
-  emails: string[],
-  html: string,
+  subscribers: Array<{ email: string; html: string }>,
   assunto: string
 ) {
   const LOTE = 8;
   let enviados = 0;
-  for (let i = 0; i < emails.length; i += LOTE) {
-    const lote = emails.slice(i, i + LOTE);
+  for (let i = 0; i < subscribers.length; i += LOTE) {
+    const lote = subscribers.slice(i, i + LOTE);
     const resultados = await Promise.allSettled(
-      lote.map((email) =>
+      lote.map(({ email, html }) =>
         transporter.sendMail({
           from: `"ECO MUNDI" <${process.env.EMAIL_USER}>`,
           to: email,
@@ -98,10 +98,10 @@ async function enviarEmLotes(
     for (let j = 0; j < resultados.length; j++) {
       const r = resultados[j];
       if (r.status === "fulfilled") {
-        console.log(`[newsletter] ✓ enviado para ${lote[j]} — messageId: ${r.value.messageId} — response: ${r.value.response}`);
+        console.log(`[newsletter] ✓ enviado para ${lote[j].email} — messageId: ${r.value.messageId} — response: ${r.value.response}`);
         enviados++;
       } else {
-        console.error(`[newsletter] ✗ falhou para ${lote[j]}:`, r.reason);
+        console.error(`[newsletter] ✗ falhou para ${lote[j].email}:`, r.reason);
       }
     }
   }
@@ -186,9 +186,15 @@ export async function POST(
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
     });
 
-    const html = emailHtml(noticia);
+    const siteUrl = process.env.SITE_URL ?? "https://ecomundi.com.br";
+    const subscribers = await Promise.all(
+      emails.map(async (email: string) => {
+        const token = await generateUnsubscribeToken(email);
+        return { email, html: emailHtml(noticia, `${siteUrl}/cancelar-inscricao/${token}`) };
+      })
+    );
     const assunto = `Nova publicação: ${noticia.titulo} | ECO MUNDI`;
-    const enviados = await enviarEmLotes(transporter, emails, html, assunto);
+    const enviados = await enviarEmLotes(transporter, subscribers, assunto);
 
     await db.execute(
       "UPDATE noticias SET newsletter_enviado_em = NOW() WHERE id = ?",

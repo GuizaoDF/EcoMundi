@@ -3,6 +3,7 @@ import nodemailer from "nodemailer";
 import db from "@/lib/db";
 import { isValidFormat, isValidMx } from "@/lib/email-validator";
 import { verifyHcaptcha } from "@/lib/hcaptcha";
+import { generateUnsubscribeToken } from "@/lib/unsubscribe-token";
 
 export async function GET() {
   try {
@@ -66,6 +67,10 @@ export async function POST(req: Request) {
       [email]
     );
 
+    const unsubToken = await generateUnsubscribeToken(email);
+    const siteUrl = process.env.SITE_URL ?? "https://ecomundi.com.br";
+    const unsubscribeUrl = `${siteUrl}/cancelar-inscricao/${unsubToken}`;
+
     try {
       const transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
@@ -128,7 +133,7 @@ export async function POST(req: Request) {
                     <tr>
                       <td style="background:#f1eee8;padding:18px 36px;text-align:center;font-size:12px;color:#888888;line-height:1.6;">
                         Você recebeu este e-mail porque se inscreveu na newsletter da ECO MUNDI.<br/>
-                        Caso não queira mais receber nossos conteúdos, entre em contato pelo site.
+                        Para cancelar sua inscrição, <a href="${unsubscribeUrl}" style="color:#0f3d2e;text-decoration:underline;">clique aqui</a>.
                       </td>
                     </tr>
                   </table>

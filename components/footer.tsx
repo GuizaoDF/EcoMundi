@@ -34,7 +34,7 @@ const socialLinks = [
     href: "https://www.linkedin.com/company/ecomundiconsultoriaegest%C3%A3o/",
     label: "LinkedIn",
   },
-  { icon: Instagram, href: "https://instagram.com", label: "Instagram" },
+  { icon: Instagram, href: "https://www.instagram.com/ecomundiconsultoriaegestao?igsh=MXJsdTVwanNzNnBybg==", label: "Instagram" },
   { icon: Mail, href: "mailto:contatobsb@ecomundi.com.br", label: "E-mail" },
 ];
 

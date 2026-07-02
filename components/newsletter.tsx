@@ -143,7 +143,6 @@ export function Newsletter() {
                   sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
                   onVerify={(token) => setCaptchaToken(token)}
                   onExpire={() => setCaptchaToken(null)}
-                  theme="dark"
                 />
               </div>
             </div>

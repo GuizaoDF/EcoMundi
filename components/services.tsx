@@ -154,6 +154,11 @@ export function Services() {
                       <div>
                         <h4 className="font-serif text-lg sm:text-xl lg:text-2xl font-semibold text-[#173b22] uppercase tracking-wide mb-1.5 sm:mb-2">
                           {service.title}
+                          {service.number === "01" && (
+                            <span className="ml-2 align-middle text-xs font-sans font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full normal-case tracking-normal">
+                              Gratuito e Confidencial
+                            </span>
+                          )}
                         </h4>
                         <p className="text-[#4a5f50] text-sm sm:text-base leading-relaxed">
                           {service.description}
@@ -164,10 +169,10 @@ export function Services() {
 
                   <div className="col-span-2 sm:col-span-1 flex justify-end sm:justify-center px-5 pb-5 sm:px-0 sm:pb-0 sm:pr-6 lg:pr-8">
                     <Link
-                      href="#contato"
+                      href={service.number === "01" ? "/diagnostico" : "#contato"}
                       className="inline-flex items-center gap-2 text-emerald-600 font-semibold text-sm sm:text-base hover:text-emerald-400 transition-colors whitespace-nowrap"
                     >
-                      Saiba mais
+                      {service.number === "01" ? "Fazer diagnóstico" : "Saiba mais"}
                       <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </div>

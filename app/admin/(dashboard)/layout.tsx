@@ -30,12 +30,28 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
     title: "Usuários",
     subtitle: "Controle de acesso ao painel administrativo.",
   },
+  "/admin/diagnostico": {
+    title: "Diagnóstico",
+    subtitle: "Resultados e analytics dos questionários.",
+  },
+  "/admin/diagnostico/formularios": {
+    title: "Formulários",
+    subtitle: "Gerencie os questionários de diagnóstico.",
+  },
+  "/admin/diagnostico/convites": {
+    title: "Convites",
+    subtitle: "Envie convites personalizados para o diagnóstico.",
+  },
 };
 
 function getPageInfo(pathname: string) {
   if (pageTitles[pathname]) return pageTitles[pathname];
   if (/^\/admin\/noticias\/\d+\/editar$/.test(pathname))
     return { title: "Editar Notícia", subtitle: "Atualize os dados da publicação." };
+  if (/^\/admin\/diagnostico\/resultados\/\d+$/.test(pathname))
+    return { title: "Resultado", subtitle: "Detalhe do diagnóstico realizado." };
+  if (/^\/admin\/diagnostico\/formularios\/\d+\/perguntas$/.test(pathname))
+    return { title: "Perguntas", subtitle: "Gerencie categorias, perguntas e alternativas." };
   return { title: "Painel", subtitle: "" };
 }
 

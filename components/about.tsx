@@ -210,7 +210,7 @@ export function About() {
                 </div>
 
                 <a
-                  href="#contato"
+                  href="/diagnostico"
                   className="w-full md:w-auto inline-flex items-center justify-center gap-3 rounded-xl bg-primary px-4 sm:px-6 py-3.5 text-center text-[14px] sm:text-[15px] font-medium text-primary-foreground shadow-lg shadow-primary/20 transition-all duration-300 hover:bg-primary/90 hover:-translate-y-0.5"
                 >
                   Diagnóstico Preliminar de Segurança Regulatória

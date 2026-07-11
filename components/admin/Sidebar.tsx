@@ -10,6 +10,9 @@ import {
   Users,
   Send,
   LogOut,
+  ClipboardList,
+  ClipboardCheck,
+  MailPlus,
 } from "lucide-react";
 
 const menu = [
@@ -19,6 +22,10 @@ const menu = [
   { title: "Newsletter", icon: Send, href: "/admin/newsletter" },
   { section: "RELACIONAMENTO" },
   { title: "Contatos", icon: Mail, href: "/admin/contatos" },
+  { section: "DIAGNÓSTICO" },
+  { title: "Resultados", icon: ClipboardList, href: "/admin/diagnostico", isActive: (p: string) => p === "/admin/diagnostico" || p.startsWith("/admin/diagnostico/resultados") },
+  { title: "Formulários", icon: ClipboardCheck, href: "/admin/diagnostico/formularios" },
+  { title: "Convites", icon: MailPlus, href: "/admin/diagnostico/convites" },
   { section: "ADMINISTRAÇÃO" },
   { title: "Usuários", icon: Users, href: "/admin/usuarios" },
 ];
@@ -61,8 +68,9 @@ export default function Sidebar() {
           }
 
           const Icon = item.icon!;
-          const active =
-            item.href === "/admin"
+          const active = "isActive" in item && item.isActive
+            ? item.isActive(pathname)
+            : item.href === "/admin"
               ? pathname === "/admin"
               : pathname === item.href || pathname.startsWith(item.href + "/");
 

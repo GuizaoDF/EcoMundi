@@ -9,6 +9,38 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const categoriaId = searchParams.get("categoria_id");
 
+  if (searchParams.get("all") === "true") {
+    const excludeCatId = searchParams.get("exclude_categoria_id");
+    try {
+      const [perguntas] = await db.execute(
+        excludeCatId
+          ? `SELECT id, texto, ordem FROM diagnostico_perguntas WHERE categoria_id != ? AND ativo = 1 ORDER BY texto ASC`
+          : `SELECT id, texto, ordem FROM diagnostico_perguntas WHERE ativo = 1 ORDER BY texto ASC`,
+        excludeCatId ? [excludeCatId] : []
+      ) as any[];
+
+      if ((perguntas as any[]).length > 0) {
+        const ids = (perguntas as any[]).map((p: any) => p.id);
+        const placeholders = ids.map(() => "?").join(",");
+        const [alternativas] = await db.execute(
+          `SELECT id, pergunta_id, texto, pontuacao, ordem FROM diagnostico_alternativas WHERE pergunta_id IN (${placeholders}) ORDER BY pergunta_id ASC, ordem ASC`,
+          ids
+        ) as any[];
+        const altsByPergunta: Record<number, any[]> = {};
+        for (const a of alternativas as any[]) {
+          if (!altsByPergunta[a.pergunta_id]) altsByPergunta[a.pergunta_id] = [];
+          altsByPergunta[a.pergunta_id].push(a);
+        }
+        const data = (perguntas as any[]).map((p: any) => ({ ...p, alternativas: altsByPergunta[p.id] ?? [] }));
+        return NextResponse.json({ success: true, data });
+      }
+      return NextResponse.json({ success: true, data: [] });
+    } catch (error) {
+      console.error("Erro ao listar todas perguntas:", error);
+      return NextResponse.json({ success: false, message: "Erro interno." }, { status: 500 });
+    }
+  }
+
   if (!categoriaId) {
     return NextResponse.json(
       { success: false, message: "categoria_id é obrigatório." },

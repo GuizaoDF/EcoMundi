@@ -16,6 +16,8 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
+  LockOpen,
+  Lock,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
@@ -66,6 +68,7 @@ interface Resultado {
   percentual: number;
   classificacao: string;
   email_enviado: number;
+  desbloqueado: number;
   criado_em: string;
   scores_categoria: ScoreCategoria[];
   respostas: Resposta[];
@@ -100,6 +103,7 @@ export default function ResultadoDetalhe() {
   const [loading, setLoading] = useState(true);
   const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
+  const [salvandoDesbloqueio, setSalvandoDesbloqueio] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   function toast(message: string, type: "success" | "error" = "success") {
@@ -116,6 +120,27 @@ export default function ResultadoDetalhe() {
       })
       .finally(() => setLoading(false));
   }, [id]);
+
+  async function toggleDesbloqueio() {
+    if (!resultado) return;
+    setSalvandoDesbloqueio(true);
+    try {
+      const novoValor = resultado.desbloqueado ? 0 : 1;
+      const res = await fetch(`/api/admin/diagnostico/resultados/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ desbloqueado: novoValor }),
+      });
+      if (res.ok) {
+        setResultado((prev) => prev ? { ...prev, desbloqueado: novoValor } : prev);
+        toast(novoValor ? "Diagnóstico desbloqueado. A empresa pode refazê-lo." : "Bloqueio restaurado.");
+      } else {
+        toast("Erro ao atualizar desbloqueio.", "error");
+      }
+    } finally {
+      setSalvandoDesbloqueio(false);
+    }
+  }
 
   async function excluir() {
     setExcluindo(true);
@@ -181,7 +206,28 @@ export default function ResultadoDetalhe() {
           <ArrowLeft size={15} />
           Voltar aos Resultados
         </Link>
-        {!confirmandoExclusao ? (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleDesbloqueio}
+            disabled={salvandoDesbloqueio}
+            className={`flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-semibold transition disabled:opacity-50 ${
+              resultado.desbloqueado
+                ? "border-gray-200 text-gray-600 hover:bg-gray-50"
+                : "border-amber-200 text-amber-700 hover:bg-amber-50"
+            }`}
+            title={resultado.desbloqueado ? "Restaurar bloqueio" : "Permitir novo diagnóstico"}
+          >
+            {salvandoDesbloqueio ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : resultado.desbloqueado ? (
+              <Lock size={15} />
+            ) : (
+              <LockOpen size={15} />
+            )}
+            {resultado.desbloqueado ? "Revogar desbloqueio" : "Desbloquear"}
+          </button>
+
+          {!confirmandoExclusao ? (
           <button
             onClick={() => setConfirmandoExclusao(true)}
             className="flex items-center gap-2 rounded-xl border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50"
@@ -207,6 +253,7 @@ export default function ResultadoDetalhe() {
             </button>
           </div>
         )}
+        </div>
       </div>
 
       {/* Header card */}

@@ -291,6 +291,21 @@ export async function POST(req: Request) {
       }
     }
 
+    // Check for duplicate submission by email or CNPJ
+    const [dup] = await db.execute(
+      `SELECT id FROM diagnostico_resultados
+       WHERE formulario_id = ? AND desbloqueado = 0
+         AND (email = ? OR (cnpj IS NOT NULL AND cnpj != '' AND cnpj = ?))
+       LIMIT 1`,
+      [formulario_id, email, cnpj || ""]
+    ) as any[];
+    if ((dup as any[]).length > 0) {
+      return Response.json(
+        { success: false, message: "Já existe um diagnóstico concluído para este e-mail ou CNPJ. Entre em contato para solicitar uma nova avaliação." },
+        { status: 409 }
+      );
+    }
+
     // Load all active questions + alternatives for this formulario
     const [activeData] = await db.execute(
       `SELECT

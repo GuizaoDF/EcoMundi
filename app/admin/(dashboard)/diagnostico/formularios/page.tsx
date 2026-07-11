@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
+  Pencil,
 } from "lucide-react";
 
 interface Formulario {
@@ -38,6 +39,10 @@ export default function AdminFormulariosPage() {
   const [ativando, setAtivando] = useState<number | null>(null);
   const [excluindo, setExcluindo] = useState<number | null>(null);
   const [confirmandoExclusao, setConfirmandoExclusao] = useState<number | null>(null);
+  const [editandoId, setEditandoId] = useState<number | null>(null);
+  const [editNome, setEditNome] = useState("");
+  const [editDescricao, setEditDescricao] = useState("");
+  const [salvandoEdicao, setSalvandoEdicao] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   function toast(message: string, type: "success" | "error" = "success") {
@@ -96,6 +101,40 @@ export default function AdminFormulariosPage() {
       }
     } finally {
       setSalvando(false);
+    }
+  }
+
+  function iniciarEdicao(f: Formulario) {
+    setEditandoId(f.id);
+    setEditNome(f.nome);
+    setEditDescricao(f.descricao ?? "");
+  }
+
+  function cancelarEdicao() {
+    setEditandoId(null);
+    setEditNome("");
+    setEditDescricao("");
+  }
+
+  async function salvarEdicao(id: number) {
+    if (!editNome.trim()) return;
+    setSalvandoEdicao(true);
+    try {
+      const res = await fetch(`/api/admin/diagnostico/formularios/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome: editNome.trim(), descricao: editDescricao.trim() || null }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast("Formulário atualizado com sucesso.");
+        cancelarEdicao();
+        carregar();
+      } else {
+        toast(data.message || "Erro ao atualizar formulário.", "error");
+      }
+    } finally {
+      setSalvandoEdicao(false);
     }
   }
 
@@ -196,93 +235,140 @@ export default function AdminFormulariosPage() {
                   : "border-[#E6DED0]"
               }`}
             >
-              {f.ativo && (
+              {f.ativo === 1 && (
                 <div className="h-1 bg-[#0f3d2e]" />
               )}
               <div className="p-6">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-bold text-[#0f3d2e]">{f.nome}</h3>
-                      {f.ativo ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">
-                          <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                          Ativo
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500">
-                          <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
-                          Inativo
-                        </span>
-                      )}
+                {editandoId === f.id ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="mb-1.5 block text-sm font-semibold text-gray-700">Nome *</label>
+                      <input
+                        type="text"
+                        value={editNome}
+                        onChange={(e) => setEditNome(e.target.value)}
+                        className="h-11 w-full rounded-xl border border-[#E6DED0] px-4 text-sm outline-none transition focus:border-[#0f3d2e] focus:ring-2 focus:ring-[#0f3d2e]/10"
+                      />
                     </div>
-                    {f.descricao && (
-                      <p className="mt-1 text-sm text-gray-500">{f.descricao}</p>
-                    )}
-                    <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-400">
-                      <span>{f.total_resultados} resultado{f.total_resultados !== 1 ? "s" : ""}</span>
-                      <span>Criado em {new Date(f.criado_em).toLocaleDateString("pt-BR")}</span>
+                    <div>
+                      <label className="mb-1.5 block text-sm font-semibold text-gray-700">Descrição</label>
+                      <textarea
+                        value={editDescricao}
+                        onChange={(e) => setEditDescricao(e.target.value)}
+                        rows={3}
+                        className="w-full rounded-xl border border-[#E6DED0] px-4 py-3 text-sm outline-none transition focus:border-[#0f3d2e] focus:ring-2 focus:ring-[#0f3d2e]/10"
+                      />
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => salvarEdicao(f.id)}
+                        disabled={salvandoEdicao || !editNome.trim()}
+                        className="flex items-center gap-2 rounded-xl bg-[#0f3d2e] px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
+                      >
+                        {salvandoEdicao && <Loader2 size={15} className="animate-spin" />}
+                        Salvar
+                      </button>
+                      <button
+                        onClick={cancelarEdicao}
+                        className="rounded-xl border border-[#E6DED0] px-5 py-2.5 text-sm font-semibold text-gray-600 transition hover:bg-gray-50"
+                      >
+                        Cancelar
+                      </button>
                     </div>
                   </div>
+                ) : (
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <h3 className="text-lg font-bold text-[#0f3d2e]">{f.nome}</h3>
+                        {f.ativo ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-700">
+                            <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+                            Ativo
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-500">
+                            <span className="h-1.5 w-1.5 rounded-full bg-gray-400" />
+                            Inativo
+                          </span>
+                        )}
+                      </div>
+                      {f.descricao && (
+                        <p className="mt-1 text-sm text-gray-500">{f.descricao}</p>
+                      )}
+                      <div className="mt-3 flex flex-wrap gap-4 text-xs text-gray-400">
+                        <span>{f.total_resultados} resultado{f.total_resultados !== 1 ? "s" : ""}</span>
+                        <span>Criado em {new Date(f.criado_em).toLocaleDateString("pt-BR")}</span>
+                      </div>
+                    </div>
 
-                  <div className="flex flex-wrap items-center gap-2">
-                    {!f.ativo && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {!f.ativo && (
+                        <button
+                          onClick={() => ativar(f.id)}
+                          disabled={ativando === f.id}
+                          className="flex items-center gap-2 rounded-xl border border-[#0f3d2e] px-4 py-2 text-sm font-semibold text-[#0f3d2e] transition hover:bg-[#0f3d2e]/5 disabled:opacity-50"
+                        >
+                          {ativando === f.id && <Loader2 size={14} className="animate-spin" />}
+                          Ativar
+                        </button>
+                      )}
+
                       <button
-                        onClick={() => ativar(f.id)}
-                        disabled={ativando === f.id}
-                        className="flex items-center gap-2 rounded-xl border border-[#0f3d2e] px-4 py-2 text-sm font-semibold text-[#0f3d2e] transition hover:bg-[#0f3d2e]/5 disabled:opacity-50"
+                        onClick={() => router.push(`/admin/diagnostico/formularios/${f.id}/perguntas`)}
+                        className="flex items-center gap-2 rounded-xl bg-[#0f3d2e] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
                       >
-                        {ativando === f.id && <Loader2 size={14} className="animate-spin" />}
-                        Ativar
+                        Gerenciar Perguntas
+                        <ChevronRight size={15} />
                       </button>
-                    )}
 
-                    <button
-                      onClick={() => router.push(`/admin/diagnostico/formularios/${f.id}/perguntas`)}
-                      className="flex items-center gap-2 rounded-xl bg-[#0f3d2e] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
-                    >
-                      Gerenciar Perguntas
-                      <ChevronRight size={15} />
-                    </button>
+                      <button
+                        onClick={() => iniciarEdicao(f)}
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#E6DED0] text-gray-500 transition hover:bg-gray-50"
+                        title="Editar nome e descrição"
+                      >
+                        <Pencil size={15} />
+                      </button>
 
-                    {f.total_resultados === 0 ? (
-                      confirmandoExclusao === f.id ? (
-                        <div className="flex items-center gap-2">
+                      {f.total_resultados === 0 ? (
+                        confirmandoExclusao === f.id ? (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => excluir(f.id)}
+                              disabled={excluindo === f.id}
+                              className="flex items-center gap-1.5 rounded-xl bg-red-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+                            >
+                              {excluindo === f.id && <Loader2 size={14} className="animate-spin" />}
+                              Confirmar
+                            </button>
+                            <button
+                              onClick={() => setConfirmandoExclusao(null)}
+                              className="rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold transition hover:bg-gray-50"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        ) : (
                           <button
-                            onClick={() => excluir(f.id)}
-                            disabled={excluindo === f.id}
-                            className="flex items-center gap-1.5 rounded-xl bg-red-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:opacity-50"
+                            onClick={() => setConfirmandoExclusao(f.id)}
+                            className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-200 text-red-500 transition hover:bg-red-50"
+                            title="Excluir formulário"
                           >
-                            {excluindo === f.id && <Loader2 size={14} className="animate-spin" />}
-                            Confirmar
+                            <Trash2 size={16} />
                           </button>
-                          <button
-                            onClick={() => setConfirmandoExclusao(null)}
-                            className="rounded-xl border border-gray-200 px-3 py-2 text-sm font-semibold transition hover:bg-gray-50"
-                          >
-                            Cancelar
-                          </button>
-                        </div>
+                        )
                       ) : (
                         <button
-                          onClick={() => setConfirmandoExclusao(f.id)}
-                          className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-200 text-red-500 transition hover:bg-red-50"
-                          title="Excluir formulário"
+                          disabled
+                          title="Não é possível excluir um formulário com resultados"
+                          className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-xl border border-gray-200 text-gray-300"
                         >
                           <Trash2 size={16} />
                         </button>
-                      )
-                    ) : (
-                      <button
-                        disabled
-                        title="Não é possível excluir um formulário com resultados"
-                        className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-xl border border-gray-200 text-gray-300"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           ))}

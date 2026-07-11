@@ -153,6 +153,10 @@ export default function DiagnosticoPage() {
   // Resultado
   const [resultado, setResultado] = useState<Resultado | null>(null);
 
+  // Trava de reenvio
+  const [verificandoTrava, setVerificandoTrava] = useState(false);
+  const [travaAtiva, setTravaAtiva] = useState(false);
+
   // Convite
   const [conviteToken, setConviteToken] = useState<string | null>(null);
   const [conviteInfo, setConviteInfo] = useState<{
@@ -321,10 +325,6 @@ export default function DiagnosticoPage() {
                   categoria e um relatório completo no seu e-mail.
                 </p>
                 <div className="flex flex-wrap gap-4 text-sm text-white/70 mb-10">
-                  <span className="flex items-center gap-1.5">
-                    <CheckCircle className="w-4 h-4 text-emerald-400" />
-                    31 perguntas em 6 categorias
-                  </span>
                   <span className="flex items-center gap-1.5">
                     <CheckCircle className="w-4 h-4 text-emerald-400" />
                     Resultado imediato na tela
@@ -727,29 +727,72 @@ export default function DiagnosticoPage() {
                 </div>
               )}
 
+              {travaAtiva && (
+                <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                  <p>
+                    Identificamos que este e-mail ou CNPJ já realizou o diagnóstico anteriormente.{" "}
+                    <Link href="/#contato" className="font-semibold underline underline-offset-2">
+                      Entre em contato
+                    </Link>{" "}
+                    para solicitar uma nova avaliação.
+                  </p>
+                </div>
+              )}
+
               <div className="flex gap-3 pt-2">
                 <Button
                   variant="outline"
-                  onClick={() => { setEtapa("dados"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                  onClick={() => { setTravaAtiva(false); setEtapa("dados"); window.scrollTo({ top: 0, behavior: "smooth" }); }}
                   className="flex-1 border-[#dfe7d8] text-[#4a5f50] hover:bg-[#f7f7f2] py-3 h-auto rounded-xl"
                 >
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Anterior
                 </Button>
                 <Button
-                  onClick={() => {
+                  disabled={verificandoTrava}
+                  onClick={async () => {
                     if (!razaoSocial.trim() || !cnpj.trim()) {
                       setErro("Razão social e CNPJ são obrigatórios.");
                       return;
                     }
                     setErro(null);
+                    setTravaAtiva(false);
+                    setVerificandoTrava(true);
+                    try {
+                      const params = new URLSearchParams({
+                        formulario_id: String(formulario?.id ?? ""),
+                        email,
+                        cnpj,
+                      });
+                      const res = await fetch(`/api/diagnostico/verificar?${params}`);
+                      const data = await res.json();
+                      if (data.bloqueado) {
+                        setTravaAtiva(true);
+                        return;
+                      }
+                    } catch {
+                      // falha silenciosa — deixa prosseguir
+                    } finally {
+                      setVerificandoTrava(false);
+                    }
                     setStepIndex(0);
                     setEtapa("perguntas");
+                    window.scrollTo({ top: 0, behavior: "smooth" });
                   }}
-                  className="flex-1 bg-[#173b22] hover:bg-[#0f2a18] text-white font-semibold py-3 h-auto rounded-xl"
+                  className="flex-1 bg-[#173b22] hover:bg-[#0f2a18] text-white font-semibold py-3 h-auto rounded-xl disabled:opacity-70"
                 >
-                  Iniciar Questionário
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  {verificandoTrava ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Verificando...
+                    </>
+                  ) : (
+                    <>
+                      Iniciar Questionário
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </>
+                  )}
                 </Button>
               </div>
             </div>

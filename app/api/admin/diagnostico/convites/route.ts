@@ -56,7 +56,6 @@ async function sendConviteEmail(params: {
                   Ao final, você receberá uma análise detalhada por categoria diretamente no seu e-mail.
                 </p>
                 <ul style="margin:0 0 24px 0;padding-left:20px;color:#555555;font-size:14px;line-height:2;">
-                  <li>31 perguntas em 6 categorias</li>
                   <li>Resultado imediato na tela</li>
                   <li>Análise completa enviada por e-mail</li>
                   <li>Link de uso único e exclusivo</li>

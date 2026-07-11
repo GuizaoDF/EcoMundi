@@ -58,6 +58,24 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   }
 }
 
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const session = await getSession();
+  if (!session) return NextResponse.json({}, { status: 401 });
+
+  const { id } = await params;
+  try {
+    const { desbloqueado } = await req.json();
+    await db.execute(
+      "UPDATE diagnostico_resultados SET desbloqueado = ? WHERE id = ?",
+      [desbloqueado ? 1 : 0, id]
+    );
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Erro ao atualizar desbloqueio:", error);
+    return NextResponse.json({ success: false, message: "Erro interno." }, { status: 500 });
+  }
+}
+
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
   if (!session) return NextResponse.json({}, { status: 401 });

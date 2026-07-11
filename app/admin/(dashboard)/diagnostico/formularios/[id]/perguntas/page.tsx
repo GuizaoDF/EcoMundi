@@ -18,6 +18,7 @@ import {
   XCircle,
   Loader2,
   ArrowLeft,
+  Search,
 } from "lucide-react";
 
 interface Categoria {
@@ -63,13 +64,21 @@ export default function PerguntasFormularioPage() {
   const [editandoCategoria, setEditandoCategoria] = useState<number | null>(null);
   const [editCatNome, setEditCatNome] = useState("");
   const [editCatDescricao, setEditCatDescricao] = useState("");
+  const [confirmandoExclusaoCategoria, setConfirmandoExclusaoCategoria] = useState<number | null>(null);
+  const [excluindoCategoria, setExcluindoCategoria] = useState<number | null>(null);
+  const [confirmandoExclusaoPergunta, setConfirmandoExclusaoPergunta] = useState<number | null>(null);
   const [criandoCategoria, setCriandoCategoria] = useState(false);
   const [novaCatNome, setNovaCatNome] = useState("");
   const [novaCatDescricao, setNovaCatDescricao] = useState("");
+  const [categoriasExistentes, setCategoriasExistentes] = useState<{ nome: string; descricao: string | null }[]>([]);
+  const [usandoCatExistente, setUsandoCatExistente] = useState(false);
   const [editandoPergunta, setEditandoPergunta] = useState<number | null>(null);
   const [criandoPergunta, setCriandoPergunta] = useState(false);
   const [editPergTexto, setEditPergTexto] = useState("");
   const [editAlternativas, setEditAlternativas] = useState<{ id?: number; texto: string; pontuacao: number; ordem: number }[]>([]);
+  const [perguntasExistentes, setPerguntasExistentes] = useState<(Pergunta & { alternativas: Alternativa[] })[]>([]);
+  const [usandoPerguntaExistente, setUsandoPerguntaExistente] = useState(false);
+  const [filtroPergunta, setFiltroPergunta] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [loadingPerguntas, setLoadingPerguntas] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -178,6 +187,31 @@ export default function PerguntasFormularioPage() {
     carregarCategorias();
   }
 
+  async function excluirCategoria(id: number) {
+    setExcluindoCategoria(id);
+    try {
+      const res = await fetch(`/api/admin/diagnostico/categorias/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        toast("Categoria excluída.");
+        setConfirmandoExclusaoCategoria(null);
+        if (categoriaAtiva === id) setCategoriaAtiva(null);
+        carregarCategorias();
+      } else {
+        toast(data.message || "Erro ao excluir categoria.", "error");
+        setConfirmandoExclusaoCategoria(null);
+      }
+    } finally {
+      setExcluindoCategoria(null);
+    }
+  }
+
+  async function carregarCategoriasExistentes() {
+    const res = await fetch(`/api/admin/diagnostico/categorias?all=true&exclude_formulario_id=${formularioId}`);
+    const data = await res.json();
+    if (data.success) setCategoriasExistentes(data.data);
+  }
+
   async function criarCategoria() {
     if (!novaCatNome.trim()) return;
     setSalvando(true);
@@ -193,6 +227,7 @@ export default function PerguntasFormularioPage() {
         toast("Categoria criada.");
         setNovaCatNome("");
         setNovaCatDescricao("");
+        setUsandoCatExistente(false);
         setCriandoCategoria(false);
         carregarCategorias();
       }
@@ -211,10 +246,18 @@ export default function PerguntasFormularioPage() {
     setExpandida(p.id);
   }
 
+  async function carregarPerguntasExistentes(catId: number) {
+    const res = await fetch(`/api/admin/diagnostico/perguntas?all=true&exclude_categoria_id=${catId}`);
+    const data = await res.json();
+    if (data.success) setPerguntasExistentes(data.data);
+  }
+
   function iniciarCriacaoPergunta() {
     setEditandoPergunta(null);
     setCriandoPergunta(true);
     setEditPergTexto("");
+    setUsandoPerguntaExistente(false);
+    setFiltroPergunta("");
     setEditAlternativas([
       { texto: "", pontuacao: 0, ordem: 1 },
       { texto: "", pontuacao: 1, ordem: 2 },
@@ -222,6 +265,7 @@ export default function PerguntasFormularioPage() {
       { texto: "", pontuacao: 3, ordem: 4 },
       { texto: "", pontuacao: 4, ordem: 5 },
     ]);
+    if (categoriaAtiva) carregarPerguntasExistentes(categoriaAtiva);
   }
 
   async function salvarPergunta() {
@@ -284,6 +328,7 @@ export default function PerguntasFormularioPage() {
     const res = await fetch(`/api/admin/diagnostico/perguntas/${id}`, { method: "DELETE" });
     const data = await res.json();
     if (data.success) {
+      setConfirmandoExclusaoPergunta(null);
       if (data.desativada) {
         toast("Pergunta desativada (possui respostas registradas).");
       } else {
@@ -317,7 +362,12 @@ export default function PerguntasFormularioPage() {
             <div className="flex items-center justify-between border-b border-[#E6DED0] px-4 py-3">
               <h3 className="font-semibold text-[#0f3d2e]">Categorias</h3>
               <button
-                onClick={() => setCriandoCategoria((v) => !v)}
+                onClick={() => {
+                  const next = !criandoCategoria;
+                  setCriandoCategoria(next);
+                  if (next) carregarCategoriasExistentes();
+                  else { setNovaCatNome(""); setNovaCatDescricao(""); setUsandoCatExistente(false); }
+                }}
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-[#0f3d2e] transition hover:bg-[#0f3d2e]/10"
                 title="Nova categoria"
               >
@@ -325,40 +375,78 @@ export default function PerguntasFormularioPage() {
               </button>
             </div>
 
-            {criandoCategoria && (
-              <div className="border-b border-[#E6DED0] p-4 space-y-3">
-                <input
-                  type="text"
-                  value={novaCatNome}
-                  onChange={(e) => setNovaCatNome(e.target.value)}
-                  placeholder="Nome da categoria"
-                  className="h-9 w-full rounded-lg border border-[#E6DED0] px-3 text-sm outline-none focus:border-[#0f3d2e]"
-                  autoFocus
-                />
-                <textarea
-                  value={novaCatDescricao}
-                  onChange={(e) => setNovaCatDescricao(e.target.value)}
-                  placeholder="Descrição (opcional)"
-                  rows={2}
-                  className="w-full rounded-lg border border-[#E6DED0] px-3 py-2 text-sm outline-none focus:border-[#0f3d2e]"
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={criarCategoria}
-                    disabled={salvando || !novaCatNome.trim()}
-                    className="flex-1 rounded-lg bg-[#0f3d2e] py-1.5 text-xs font-semibold text-white disabled:opacity-50"
-                  >
-                    Criar
-                  </button>
-                  <button
-                    onClick={() => { setCriandoCategoria(false); setNovaCatNome(""); setNovaCatDescricao(""); }}
-                    className="rounded-lg border border-[#E6DED0] px-3 py-1.5 text-xs font-semibold"
-                  >
-                    Cancelar
-                  </button>
+            {criandoCategoria && (() => {
+              const nomesJaUsados = new Set(categorias.map((c) => c.nome.toLowerCase()));
+              const nomeJaExiste = nomesJaUsados.has(novaCatNome.trim().toLowerCase());
+              const sugestoes = categoriasExistentes
+                .filter((c) => !nomesJaUsados.has(c.nome.toLowerCase()))
+                .filter((c) => !novaCatNome || c.nome.toLowerCase().includes(novaCatNome.toLowerCase()))
+                .slice(0, 6);
+              return (
+                <div className="border-b border-[#E6DED0] p-4 space-y-3">
+                  <div>
+                    <input
+                      type="text"
+                      value={novaCatNome}
+                      onChange={(e) => { setNovaCatNome(e.target.value); setUsandoCatExistente(false); }}
+                      placeholder="Buscar ou digitar nome..."
+                      className="h-9 w-full rounded-lg border border-[#E6DED0] px-3 text-sm outline-none focus:border-[#0f3d2e]"
+                      autoFocus
+                    />
+                    {sugestoes.length > 0 && (
+                      <div className="mt-1 max-h-36 overflow-y-auto rounded-lg border border-[#E6DED0] bg-white shadow-sm">
+                        <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                          Existentes
+                        </p>
+                        {sugestoes.map((cat, i) => (
+                          <button
+                            key={i}
+                            type="button"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              setNovaCatNome(cat.nome);
+                              setNovaCatDescricao(cat.descricao || "");
+                              setUsandoCatExistente(true);
+                            }}
+                            className="w-full px-3 py-1.5 text-left hover:bg-[#f0f7f4]"
+                          >
+                            <div className="truncate text-xs font-medium text-gray-800">{cat.nome}</div>
+                            {cat.descricao && (
+                              <div className="truncate text-[11px] text-gray-400">{cat.descricao}</div>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <textarea
+                    value={novaCatDescricao}
+                    onChange={(e) => setNovaCatDescricao(e.target.value)}
+                    placeholder="Descrição (opcional)"
+                    rows={2}
+                    className="w-full rounded-lg border border-[#E6DED0] px-3 py-2 text-sm outline-none focus:border-[#0f3d2e]"
+                  />
+                  <div className="flex gap-2">
+                    {nomeJaExiste && (
+                      <p className="w-full text-xs text-red-500">Esta categoria já existe neste formulário.</p>
+                    )}
+                    <button
+                      onClick={criarCategoria}
+                      disabled={salvando || !novaCatNome.trim() || nomeJaExiste}
+                      className="flex-1 rounded-lg bg-[#0f3d2e] py-1.5 text-xs font-semibold text-white disabled:opacity-50"
+                    >
+                      {usandoCatExistente ? "Usar" : "Criar"}
+                    </button>
+                    <button
+                      onClick={() => { setCriandoCategoria(false); setNovaCatNome(""); setNovaCatDescricao(""); setUsandoCatExistente(false); }}
+                      className="rounded-lg border border-[#E6DED0] px-3 py-1.5 text-xs font-semibold"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
+              );
+            })()}
 
             <div className="max-h-[600px] overflow-y-auto">
               {categorias.map((cat, idx) => (
@@ -388,6 +476,26 @@ export default function PerguntasFormularioPage() {
                           <Save size={11} /> Salvar
                         </button>
                         <button onClick={() => setEditandoCategoria(null)} className="rounded-lg border border-[#E6DED0] px-2 py-1 text-xs">
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  ) : confirmandoExclusaoCategoria === cat.id ? (
+                    <div className="p-3 space-y-2" onClick={(e) => e.stopPropagation()}>
+                      <p className="text-xs text-gray-600">Excluir <strong>{cat.nome}</strong>?</p>
+                      <div className="flex gap-1.5">
+                        <button
+                          onClick={() => excluirCategoria(cat.id)}
+                          disabled={excluindoCategoria === cat.id}
+                          className="flex items-center gap-1 rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white disabled:opacity-50"
+                        >
+                          {excluindoCategoria === cat.id && <Loader2 size={11} className="animate-spin" />}
+                          Confirmar
+                        </button>
+                        <button
+                          onClick={() => setConfirmandoExclusaoCategoria(null)}
+                          className="rounded-lg border border-[#E6DED0] px-2 py-1 text-xs"
+                        >
                           Cancelar
                         </button>
                       </div>
@@ -430,6 +538,13 @@ export default function PerguntasFormularioPage() {
                         >
                           <Pencil size={13} />
                         </button>
+                        <button
+                          onClick={() => setConfirmandoExclusaoCategoria(cat.id)}
+                          className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:text-red-500"
+                          title="Excluir categoria"
+                        >
+                          <Trash2 size={13} />
+                        </button>
                       </div>
                       {categoriaAtiva === cat.id && (
                         <ChevronRight size={14} className="shrink-0 text-[#0f3d2e]" />
@@ -469,20 +584,66 @@ export default function PerguntasFormularioPage() {
               ) : (
                 <div className="divide-y divide-[#F0EBE3]">
                   {/* Form para nova pergunta */}
-                  {criandoPergunta && (
-                    <div className="p-6 bg-[#faf8f3]">
-                      <h4 className="mb-4 text-sm font-semibold text-[#0f3d2e]">Nova Pergunta</h4>
-                      <EditPerguntaForm
-                        texto={editPergTexto}
-                        onTextoChange={setEditPergTexto}
-                        alternativas={editAlternativas}
-                        onAlternativasChange={setEditAlternativas}
-                        onSalvar={salvarPergunta}
-                        onCancelar={() => setCriandoPergunta(false)}
-                        salvando={salvando}
-                      />
-                    </div>
-                  )}
+                  {criandoPergunta && (() => {
+                    const sugestoesPergunta = filtroPergunta.trim().length >= 2
+                      ? perguntasExistentes.filter((p) => p.texto.toLowerCase().includes(filtroPergunta.toLowerCase())).slice(0, 8)
+                      : [];
+                    return (
+                      <div className="p-6 bg-[#faf8f3]">
+                        <h4 className="mb-4 text-sm font-semibold text-[#0f3d2e]">Nova Pergunta</h4>
+                        <div className="mb-5">
+                          <div className="relative">
+                            <Search size={13} className="absolute left-2.5 top-2.5 text-gray-400" />
+                            <input
+                              type="text"
+                              value={filtroPergunta}
+                              onChange={(e) => { setFiltroPergunta(e.target.value); setUsandoPerguntaExistente(false); }}
+                              placeholder="Buscar em perguntas existentes..."
+                              className="h-9 w-full rounded-lg border border-[#E6DED0] bg-white px-3 pl-8 text-sm outline-none focus:border-[#0f3d2e]"
+                            />
+                          </div>
+                          {sugestoesPergunta.length > 0 && (
+                            <div className="mt-1 max-h-48 overflow-y-auto rounded-lg border border-[#E6DED0] bg-white shadow-sm">
+                              <p className="px-3 pt-1.5 pb-0.5 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
+                                Existentes
+                              </p>
+                              {sugestoesPergunta.map((p) => (
+                                <button
+                                  key={p.id}
+                                  type="button"
+                                  onMouseDown={(e) => {
+                                    e.preventDefault();
+                                    setEditPergTexto(p.texto);
+                                    const alts = [...p.alternativas].sort((a, b) => a.ordem - b.ordem);
+                                    while (alts.length < 5) alts.push({ id: undefined as any, texto: "", pontuacao: alts.length, ordem: alts.length + 1 });
+                                    setEditAlternativas(alts.map((a) => ({ id: undefined, texto: a.texto, pontuacao: a.pontuacao, ordem: a.ordem })));
+                                    setUsandoPerguntaExistente(true);
+                                    setFiltroPergunta("");
+                                  }}
+                                  className="w-full px-3 py-2 text-left hover:bg-[#f0f7f4]"
+                                >
+                                  <div className="line-clamp-2 text-xs text-gray-800">{p.texto}</div>
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                          {filtroPergunta.trim().length >= 2 && sugestoesPergunta.length === 0 && (
+                            <p className="mt-1 px-1 text-xs text-gray-400">Nenhuma pergunta encontrada. Preencha o formulário abaixo para criar.</p>
+                          )}
+                        </div>
+                        <EditPerguntaForm
+                          texto={editPergTexto}
+                          onTextoChange={(v) => { setEditPergTexto(v); setUsandoPerguntaExistente(false); }}
+                          alternativas={editAlternativas}
+                          onAlternativasChange={setEditAlternativas}
+                          onSalvar={salvarPergunta}
+                          onCancelar={() => { setCriandoPergunta(false); setUsandoPerguntaExistente(false); setFiltroPergunta(""); }}
+                          salvando={salvando}
+                          labelSalvar={usandoPerguntaExistente ? "Usar" : "Salvar"}
+                        />
+                      </div>
+                    );
+                  })()}
 
                   {perguntas.length === 0 && !criandoPergunta && (
                     <div className="py-12 text-center text-gray-400">
@@ -507,31 +668,50 @@ export default function PerguntasFormularioPage() {
                           {p.texto}
                         </p>
                         <div className="flex shrink-0 items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => toggleAtivoPergunta(p)}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:text-[#0f3d2e] transition"
-                            title={p.ativo ? "Desativar" : "Ativar"}
-                          >
-                            {p.ativo ? <Eye size={15} /> : <EyeOff size={15} />}
-                          </button>
-                          <button
-                            onClick={() => iniciarEdicaoPergunta(p)}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:text-[#0f3d2e] transition"
-                            title="Editar"
-                          >
-                            <Pencil size={15} />
-                          </button>
-                          <button
-                            onClick={() => excluirPergunta(p.id)}
-                            className="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:text-red-500 transition"
-                            title="Excluir"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                          <ChevronDown
-                            size={15}
-                            className={`text-gray-400 transition-transform ${expandida === p.id ? "rotate-180" : ""}`}
-                          />
+                          {confirmandoExclusaoPergunta === p.id ? (
+                            <>
+                              <button
+                                onClick={() => excluirPergunta(p.id)}
+                                className="rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white transition hover:bg-red-700"
+                              >
+                                Confirmar
+                              </button>
+                              <button
+                                onClick={() => setConfirmandoExclusaoPergunta(null)}
+                                className="rounded-lg border border-gray-200 px-2 py-1 text-xs font-semibold transition hover:bg-gray-50"
+                              >
+                                Cancelar
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => toggleAtivoPergunta(p)}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:text-[#0f3d2e] transition"
+                                title={p.ativo ? "Desativar" : "Ativar"}
+                              >
+                                {p.ativo ? <Eye size={15} /> : <EyeOff size={15} />}
+                              </button>
+                              <button
+                                onClick={() => iniciarEdicaoPergunta(p)}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:text-[#0f3d2e] transition"
+                                title="Editar"
+                              >
+                                <Pencil size={15} />
+                              </button>
+                              <button
+                                onClick={() => setConfirmandoExclusaoPergunta(p.id)}
+                                className="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 hover:text-red-500 transition"
+                                title="Excluir"
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                              <ChevronDown
+                                size={15}
+                                className={`text-gray-400 transition-transform ${expandida === p.id ? "rotate-180" : ""}`}
+                              />
+                            </>
+                          )}
                         </div>
                       </div>
 
@@ -598,6 +778,7 @@ function EditPerguntaForm({
   onSalvar,
   onCancelar,
   salvando,
+  labelSalvar = "Salvar",
 }: {
   texto: string;
   onTextoChange: (v: string) => void;
@@ -606,6 +787,7 @@ function EditPerguntaForm({
   onSalvar: () => void;
   onCancelar: () => void;
   salvando: boolean;
+  labelSalvar?: string;
 }) {
   const SCORE_LABELS = ["R1", "R2", "R3", "R4", "R5"];
 
@@ -666,7 +848,7 @@ function EditPerguntaForm({
           className="flex items-center gap-2 rounded-xl bg-[#0f3d2e] px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
         >
           {salvando ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
-          Salvar
+          {labelSalvar}
         </button>
         <button
           onClick={onCancelar}

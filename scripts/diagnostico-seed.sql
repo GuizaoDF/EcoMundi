@@ -1,6 +1,6 @@
 -- =============================================================
 -- ECO MUNDI — Diagnóstico Preliminar de Conformidade Regulatória
--- Seed: tabelas + formulário Hotelaria com 6 categorias e 31 perguntas
+-- Seed: tabelas + formulário Hotelaria (Diagnóstico Preliminar)
 -- Executar no banco MySQL configurado em .env.local
 -- =============================================================
 

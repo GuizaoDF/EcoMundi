@@ -9,7 +9,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params;
   try {
     const [rows] = await db.execute(
-      `SELECT f.id, f.nome, f.descricao, f.ativo, f.criado_em,
+      `SELECT f.id, f.nome, f.descricao, f.campos_perfil, f.ativo, f.criado_em,
               COUNT(DISTINCT c.id) AS total_categorias,
               COUNT(DISTINCT r.id) AS total_resultados
        FROM diagnostico_formularios f
@@ -23,7 +23,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     if (!rows.length) {
       return NextResponse.json({ success: false, message: "Não encontrado." }, { status: 404 });
     }
-    return NextResponse.json({ success: true, data: rows[0] });
+    const row = rows[0];
+    if (row.campos_perfil && typeof row.campos_perfil === "string") {
+      row.campos_perfil = JSON.parse(row.campos_perfil);
+    }
+    return NextResponse.json({ success: true, data: row });
   } catch (error) {
     console.error("Erro ao buscar formulário:", error);
     return NextResponse.json({ success: false, message: "Erro interno." }, { status: 500 });
@@ -36,14 +40,34 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
   const { id } = await params;
   try {
-    const { nome, descricao } = await req.json();
-    if (!nome) {
-      return NextResponse.json({ success: false, message: "Nome é obrigatório." }, { status: 400 });
+    const body = await req.json();
+    const updates: string[] = [];
+    const values: any[] = [];
+
+    if (body.nome !== undefined) {
+      if (!body.nome) {
+        return NextResponse.json({ success: false, message: "Nome é obrigatório." }, { status: 400 });
+      }
+      updates.push("nome = ?");
+      values.push(body.nome);
+    }
+    if (body.descricao !== undefined) {
+      updates.push("descricao = ?");
+      values.push(body.descricao || null);
+    }
+    if (body.campos_perfil !== undefined) {
+      updates.push("campos_perfil = ?");
+      values.push(body.campos_perfil !== null ? JSON.stringify(body.campos_perfil) : null);
     }
 
+    if (updates.length === 0) {
+      return NextResponse.json({ success: false, message: "Nenhum campo para atualizar." }, { status: 400 });
+    }
+
+    values.push(id);
     await db.execute(
-      "UPDATE diagnostico_formularios SET nome = ?, descricao = ? WHERE id = ?",
-      [nome, descricao || null, id]
+      `UPDATE diagnostico_formularios SET ${updates.join(", ")} WHERE id = ?`,
+      values
     );
 
     return NextResponse.json({ success: true });

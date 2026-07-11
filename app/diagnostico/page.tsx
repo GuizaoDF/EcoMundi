@@ -44,11 +44,20 @@ interface Categoria {
   perguntas: Pergunta[];
 }
 
+interface CampoPerfil {
+  id: string;
+  label: string;
+  tipo: "text" | "number" | "boolean" | "select";
+  obrigatorio: boolean;
+  opcoes?: string[];
+}
+
 interface FormularioData {
   id: number;
   nome: string;
   descricao: string;
   categorias: Categoria[];
+  campos_perfil?: CampoPerfil[];
 }
 
 interface CategoriaResultado {
@@ -138,14 +147,9 @@ export default function DiagnosticoPage() {
   // Identificação da empresa
   const [razaoSocial, setRazaoSocial] = useState("");
   const [cnpj, setCnpj] = useState("");
-  const [numHospedes, setNumHospedes] = useState("");
-  const [temRestaurante, setTemRestaurante] = useState("NÃO");
-  const [temEventos, setTemEventos] = useState(false);
-  const [temPiscina, setTemPiscina] = useState(false);
-  const [temCaldeira, setTemCaldeira] = useState(false);
-  const [temAnimais, setTemAnimais] = useState(false);
-  const [temAmbulatorio, setTemAmbulatorio] = useState(false);
-  const [temRefeitorio, setTemRefeitorio] = useState(false);
+  const [telefone, setTelefone] = useState("");
+  const [camposPerfil, setCamposPerfil] = useState<CampoPerfil[]>([]);
+  const [dadosPerfil, setDadosPerfil] = useState<Record<string, string | boolean>>({});
 
   // Respostas: pergunta_id → alternativa_id
   const [respostas, setRespostas] = useState<Record<number, number>>({});
@@ -201,7 +205,10 @@ export default function DiagnosticoPage() {
         setEtapa("indisponivel");
         return;
       }
+      const campos: CampoPerfil[] = data.formulario.campos_perfil ?? [];
       setFormulario({ ...data.formulario, categorias: data.categorias ?? [] });
+      setCamposPerfil(campos);
+      setDadosPerfil({});
       // Pré-preencher campos do convite
       if (conviteInfo) {
         if (conviteInfo.nome_contato) setNome(conviteInfo.nome_contato);
@@ -236,16 +243,10 @@ export default function DiagnosticoPage() {
           formulario_id: formulario.id,
           nome,
           email,
+          telefone: telefone || undefined,
           razao_social: razaoSocial,
           cnpj,
-          num_hospedes: numHospedes,
-          tem_restaurante: temRestaurante,
-          tem_eventos: temEventos,
-          tem_piscina: temPiscina,
-          tem_caldeira: temCaldeira,
-          tem_animais: temAnimais,
-          tem_ambulatorio: temAmbulatorio,
-          tem_refeitorio: temRefeitorio,
+          dados_perfil: Object.keys(dadosPerfil).length > 0 ? dadosPerfil : undefined,
           hcaptchaToken: captchaToken,
           respostas: todasRespostas,
           convite_token: conviteToken ?? undefined,
@@ -626,6 +627,7 @@ export default function DiagnosticoPage() {
             </div>
 
             <div className="bg-white rounded-2xl border border-[#dfe7d8] shadow-[0_4px_24px_rgba(23,59,34,0.06)] p-6 sm:p-8 space-y-5">
+              {/* Razão social */}
               <div>
                 <Label htmlFor="razao" className="text-sm font-semibold text-[#173b22] mb-1.5 block">
                   Razão social e nome fantasia <span className="text-red-500">*</span>
@@ -639,6 +641,7 @@ export default function DiagnosticoPage() {
                 />
               </div>
 
+              {/* CNPJ */}
               <div>
                 <Label htmlFor="cnpj" className="text-sm font-semibold text-[#173b22] mb-1.5 block">
                   CNPJ <span className="text-red-500">*</span>
@@ -652,73 +655,91 @@ export default function DiagnosticoPage() {
                 />
               </div>
 
+              {/* Telefone */}
               <div>
-                <Label htmlFor="hospedes" className="text-sm font-semibold text-[#173b22] mb-1.5 block">
-                  Número aproximado de hóspedes/mês
+                <Label htmlFor="telefone" className="text-sm font-semibold text-[#173b22] mb-1.5 block">
+                  Telefone
                 </Label>
                 <Input
-                  id="hospedes"
-                  value={numHospedes}
-                  onChange={(e) => setNumHospedes(e.target.value)}
-                  placeholder="Ex: 500"
+                  id="telefone"
+                  value={telefone}
+                  onChange={(e) => setTelefone(e.target.value)}
+                  placeholder="(00) 00000-0000"
                   className="border-[#dfe7d8] focus-visible:ring-emerald-400/30 focus-visible:border-emerald-400"
                 />
               </div>
 
-              {/* Restaurante */}
-              <div>
-                <Label className="text-sm font-semibold text-[#173b22] mb-2 block">
-                  Possui restaurante próprio na mesma instalação?
-                </Label>
-                <div className="grid grid-cols-2 gap-2">
-                  {["SIM", "NÃO", "TERCEIRIZADO", "POSSUI MAS EM OUTRO LOCAL"].map((op) => (
-                    <button
-                      key={op}
-                      type="button"
-                      onClick={() => setTemRestaurante(op)}
-                      className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-all text-left ${
-                        temRestaurante === op
-                          ? "bg-[#173b22] text-white border-[#173b22]"
-                          : "bg-white text-[#4a5f50] border-[#dfe7d8] hover:border-[#173b22]/30"
-                      }`}
-                    >
-                      {op}
-                    </button>
-                  ))}
-                </div>
-              </div>
+              {/* Campos de perfil dinâmicos */}
+              {camposPerfil.map((campo) => {
+                if (campo.tipo === "boolean") {
+                  return (
+                    <div key={campo.id}>
+                      <Label className="text-sm font-semibold text-[#173b22] mb-2 block">
+                        {campo.label}
+                        {campo.obrigatorio && <span className="text-red-500"> *</span>}
+                      </Label>
+                      <div className="flex gap-3">
+                        {([true, false] as const).map((v) => (
+                          <button
+                            key={String(v)}
+                            type="button"
+                            onClick={() => setDadosPerfil((d) => ({ ...d, [campo.id]: v }))}
+                            className={`px-6 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                              dadosPerfil[campo.id] === v
+                                ? "bg-[#173b22] text-white border-[#173b22]"
+                                : "bg-white text-[#4a5f50] border-[#dfe7d8] hover:border-[#173b22]/30"
+                            }`}
+                          >
+                            {v ? "SIM" : "NÃO"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
 
-              {/* Perguntas SIM/NÃO */}
-              {[
-                { label: "Possui local para eventos, feiras, palestras?", value: temEventos, set: setTemEventos },
-                { label: "Possui piscina?", value: temPiscina, set: setTemPiscina },
-                { label: "Possui caldeira com aquecimento a gás ou derivado florestal?", value: temCaldeira, set: setTemCaldeira },
-                { label: "Possui atividades com animais silvestres, domésticos ou domesticados?", value: temAnimais, set: setTemAnimais },
-                { label: "Possui ambulatório ou enfermaria?", value: temAmbulatorio, set: setTemAmbulatorio },
-                { label: "Possui refeitório para os colaboradores?", value: temRefeitorio, set: setTemRefeitorio },
-              ].map(({ label, value, set }) => (
-                <div key={label}>
-                  <Label className="text-sm font-semibold text-[#173b22] mb-2 block">
-                    {label}
-                  </Label>
-                  <div className="flex gap-3">
-                    {[true, false].map((v) => (
-                      <button
-                        key={String(v)}
-                        type="button"
-                        onClick={() => set(v)}
-                        className={`px-6 py-2.5 rounded-lg border text-sm font-medium transition-all ${
-                          value === v
-                            ? "bg-[#173b22] text-white border-[#173b22]"
-                            : "bg-white text-[#4a5f50] border-[#dfe7d8] hover:border-[#173b22]/30"
-                        }`}
-                      >
-                        {v ? "SIM" : "NÃO"}
-                      </button>
-                    ))}
+                if (campo.tipo === "select" && campo.opcoes) {
+                  return (
+                    <div key={campo.id}>
+                      <Label className="text-sm font-semibold text-[#173b22] mb-2 block">
+                        {campo.label}
+                        {campo.obrigatorio && <span className="text-red-500"> *</span>}
+                      </Label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {campo.opcoes.map((op) => (
+                          <button
+                            key={op}
+                            type="button"
+                            onClick={() => setDadosPerfil((d) => ({ ...d, [campo.id]: op }))}
+                            className={`px-3 py-2.5 rounded-lg border text-sm font-medium transition-all text-left ${
+                              dadosPerfil[campo.id] === op
+                                ? "bg-[#173b22] text-white border-[#173b22]"
+                                : "bg-white text-[#4a5f50] border-[#dfe7d8] hover:border-[#173b22]/30"
+                            }`}
+                          >
+                            {op}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div key={campo.id}>
+                    <Label className="text-sm font-semibold text-[#173b22] mb-1.5 block">
+                      {campo.label}
+                      {campo.obrigatorio && <span className="text-red-500"> *</span>}
+                    </Label>
+                    <Input
+                      type={campo.tipo === "number" ? "number" : "text"}
+                      value={String(dadosPerfil[campo.id] ?? "")}
+                      onChange={(e) => setDadosPerfil((d) => ({ ...d, [campo.id]: e.target.value }))}
+                      className="border-[#dfe7d8] focus-visible:ring-emerald-400/30 focus-visible:border-emerald-400"
+                    />
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
               {erro && (
                 <div className="flex items-start gap-2 text-red-600 text-sm bg-red-50 rounded-lg p-3">
@@ -755,6 +776,16 @@ export default function DiagnosticoPage() {
                     if (!razaoSocial.trim() || !cnpj.trim()) {
                       setErro("Razão social e CNPJ são obrigatórios.");
                       return;
+                    }
+                    for (const campo of camposPerfil.filter((c) => c.obrigatorio)) {
+                      const val = dadosPerfil[campo.id];
+                      const vazio = campo.tipo === "boolean"
+                        ? val === undefined
+                        : !String(val ?? "").trim();
+                      if (vazio) {
+                        setErro(`O campo "${campo.label}" é obrigatório.`);
+                        return;
+                      }
                     }
                     setErro(null);
                     setTravaAtiva(false);

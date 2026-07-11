@@ -5,13 +5,6 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  UtensilsCrossed,
-  CalendarDays,
-  Waves,
-  Flame,
-  PawPrint,
-  Stethoscope,
-  Coffee,
   Trash2,
   CheckCircle2,
   XCircle,
@@ -53,16 +46,10 @@ interface Resultado {
   formulario_nome: string;
   nome: string;
   email: string;
+  telefone: string | null;
   razao_social: string | null;
   cnpj: string | null;
-  num_hospedes: string | null;
-  tem_restaurante: string | null;
-  tem_eventos: number | null;
-  tem_piscina: number | null;
-  tem_caldeira: number | null;
-  tem_animais: number | null;
-  tem_ambulatorio: number | null;
-  tem_refeitorio: number | null;
+  dados_perfil: Record<string, string | boolean> | null;
   pontuacao_total: number;
   pontuacao_maxima: number;
   percentual: number;
@@ -185,15 +172,9 @@ export default function ResultadoDetalhe() {
     respostas: resultado.respostas.filter((r) => r.categoria_nome === sc.nome),
   }));
 
-  const perfil = [
-    resultado.tem_restaurante && resultado.tem_restaurante !== "NÃO" && { icon: UtensilsCrossed, label: `Restaurante: ${resultado.tem_restaurante}` },
-    resultado.tem_eventos && { icon: CalendarDays, label: "Local para Eventos" },
-    resultado.tem_piscina && { icon: Waves, label: "Piscina" },
-    resultado.tem_caldeira && { icon: Flame, label: "Caldeira" },
-    resultado.tem_animais && { icon: PawPrint, label: "Atividades com Animais" },
-    resultado.tem_ambulatorio && { icon: Stethoscope, label: "Ambulatório" },
-    resultado.tem_refeitorio && { icon: Coffee, label: "Refeitório" },
-  ].filter(Boolean) as { icon: any; label: string }[];
+  const dadosPerfilEntries = resultado.dados_perfil
+    ? Object.entries(resultado.dados_perfil)
+    : [];
 
   return (
     <div className="space-y-6">
@@ -280,8 +261,8 @@ export default function ResultadoDetalhe() {
               <p className="mt-1 font-semibold text-gray-800">{resultado.cnpj || "—"}</p>
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Hóspedes/Mês</p>
-              <p className="mt-1 font-semibold text-gray-800">{resultado.num_hospedes || "—"}</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Telefone</p>
+              <p className="mt-1 font-semibold text-gray-800">{resultado.telefone || "—"}</p>
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Formulário</p>
@@ -307,18 +288,22 @@ export default function ResultadoDetalhe() {
         </div>
       </div>
 
-      {/* Perfil do hotel */}
-      {perfil.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {perfil.map(({ icon: Icon, label }) => (
-            <div
-              key={label}
-              className="flex items-center gap-2 rounded-xl border border-[#E6DED0] bg-white px-3 py-2 text-sm font-medium text-gray-700"
-            >
-              <Icon size={15} className="text-[#0f3d2e]" />
-              {label}
-            </div>
-          ))}
+      {/* Campos de perfil dinâmicos */}
+      {dadosPerfilEntries.length > 0 && (
+        <div className="rounded-2xl border border-[#E6DED0] bg-white p-5">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-400">Perfil</p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {dadosPerfilEntries.map(([key, val]) => (
+              <div key={key}>
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-0.5">
+                  {key.replace(/_/g, " ")}
+                </p>
+                <p className="font-semibold text-gray-800 text-sm">
+                  {typeof val === "boolean" ? (val ? "Sim" : "Não") : String(val) || "—"}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

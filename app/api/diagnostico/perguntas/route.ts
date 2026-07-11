@@ -8,15 +8,18 @@ export async function GET(req: Request) {
     let formulario: any;
     if (formularioId) {
       const [rows] = await db.execute(
-        "SELECT id, nome, descricao FROM diagnostico_formularios WHERE id = ?",
+        "SELECT id, nome, descricao, campos_perfil FROM diagnostico_formularios WHERE id = ?",
         [formularioId]
       ) as any[];
       formulario = rows[0];
     } else {
       const [rows] = await db.execute(
-        "SELECT id, nome, descricao FROM diagnostico_formularios WHERE ativo = 1 LIMIT 1"
+        "SELECT id, nome, descricao, campos_perfil FROM diagnostico_formularios WHERE ativo = 1 LIMIT 1"
       ) as any[];
       formulario = rows[0];
+    }
+    if (formulario && formulario.campos_perfil && typeof formulario.campos_perfil === "string") {
+      formulario.campos_perfil = JSON.parse(formulario.campos_perfil);
     }
 
     if (!formulario) {
@@ -98,7 +101,7 @@ export async function GET(req: Request) {
     return Response.json({
       success: true,
       ativo: true,
-      formulario: { id: formulario.id, nome: formulario.nome, descricao: formulario.descricao },
+      formulario: { id: formulario.id, nome: formulario.nome, descricao: formulario.descricao, campos_perfil: formulario.campos_perfil ?? [] },
       categorias: result,
     });
   } catch (error) {

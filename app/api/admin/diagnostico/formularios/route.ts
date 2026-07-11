@@ -8,7 +8,7 @@ export async function GET() {
 
   try {
     const [rows] = await db.execute(
-      `SELECT f.id, f.nome, f.descricao, f.ativo, f.criado_em,
+      `SELECT f.id, f.nome, f.descricao, f.ativo, f.campos_perfil, f.criado_em,
               COUNT(r.id) AS total_resultados
        FROM diagnostico_formularios f
        LEFT JOIN diagnostico_resultados r ON r.formulario_id = f.id
@@ -16,7 +16,14 @@ export async function GET() {
        ORDER BY f.criado_em DESC`
     ) as any[];
 
-    return NextResponse.json({ success: true, data: rows });
+    const data = (rows as any[]).map((r) => ({
+      ...r,
+      campos_perfil: r.campos_perfil
+        ? (typeof r.campos_perfil === "string" ? JSON.parse(r.campos_perfil) : r.campos_perfil)
+        : [],
+    }));
+
+    return NextResponse.json({ success: true, data });
   } catch (error) {
     console.error("Erro ao listar formulários:", error);
     return NextResponse.json({ success: false, message: "Erro interno." }, { status: 500 });

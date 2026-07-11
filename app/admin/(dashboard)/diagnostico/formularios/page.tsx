@@ -315,6 +315,14 @@ export default function AdminFormulariosPage() {
                       )}
 
                       <button
+                        onClick={() => router.push(`/admin/diagnostico/formularios/${f.id}/perfil`)}
+                        className="flex items-center gap-2 rounded-xl border border-[#0f3d2e] px-4 py-2 text-sm font-semibold text-[#0f3d2e] transition hover:bg-[#0f3d2e]/5"
+                      >
+                        Perfil da Empresa
+                        <ChevronRight size={15} />
+                      </button>
+
+                      <button
                         onClick={() => router.push(`/admin/diagnostico/formularios/${f.id}/perguntas`)}
                         className="flex items-center gap-2 rounded-xl bg-[#0f3d2e] px-4 py-2 text-sm font-semibold text-white transition hover:opacity-90"
                       >

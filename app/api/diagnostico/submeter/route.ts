@@ -197,16 +197,10 @@ export async function POST(req: Request) {
       formulario_id,
       nome,
       email,
+      telefone,
       razao_social,
       cnpj,
-      num_hospedes,
-      tem_restaurante,
-      tem_eventos,
-      tem_piscina,
-      tem_caldeira,
-      tem_animais,
-      tem_ambulatorio,
-      tem_refeitorio,
+      dados_perfil,
       hcaptchaToken,
       respostas,
       convite_token,
@@ -406,16 +400,13 @@ export async function POST(req: Request) {
 
       const [inserted] = await conn.execute(
         `INSERT INTO diagnostico_resultados
-           (formulario_id, nome, email, razao_social, cnpj, num_hospedes,
-            tem_restaurante, tem_eventos, tem_piscina, tem_caldeira,
-            tem_animais, tem_ambulatorio, tem_refeitorio,
+           (formulario_id, nome, email, telefone, razao_social, cnpj, dados_perfil,
             pontuacao_total, pontuacao_maxima, percentual, classificacao)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          formulario_id, nome, email, razao_social || null, cnpj || null,
-          num_hospedes || null, tem_restaurante || null,
-          tem_eventos ? 1 : 0, tem_piscina ? 1 : 0, tem_caldeira ? 1 : 0,
-          tem_animais ? 1 : 0, tem_ambulatorio ? 1 : 0, tem_refeitorio ? 1 : 0,
+          formulario_id, nome, email, telefone || null,
+          razao_social || null, cnpj || null,
+          dados_perfil ? JSON.stringify(dados_perfil) : null,
           pontuacaoTotal, pontuacaoMaxima, percentual, classificacao,
         ]
       );

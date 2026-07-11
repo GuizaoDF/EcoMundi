@@ -21,6 +21,9 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     }
 
     const resultado = rows[0];
+    if (resultado.dados_perfil && typeof resultado.dados_perfil === "string") {
+      resultado.dados_perfil = JSON.parse(resultado.dados_perfil);
+    }
 
     const [scores] = await db.execute(
       `SELECT sc.categoria_id, sc.pontuacao, sc.pontuacao_max, sc.percentual, c.nome

@@ -37,6 +37,7 @@ export default function AdminFormulariosPage() {
   const [novaDescricao, setNovaDescricao] = useState("");
   const [salvando, setSalvando] = useState(false);
   const [ativando, setAtivando] = useState<number | null>(null);
+  const [inativando, setInativando] = useState<number | null>(null);
   const [excluindo, setExcluindo] = useState<number | null>(null);
   const [confirmandoExclusao, setConfirmandoExclusao] = useState<number | null>(null);
   const [editandoId, setEditandoId] = useState<number | null>(null);
@@ -77,6 +78,21 @@ export default function AdminFormulariosPage() {
       }
     } finally {
       setAtivando(null);
+    }
+  }
+
+  async function inativar(id: number) {
+    setInativando(id);
+    try {
+      const res = await fetch(`/api/admin/diagnostico/formularios/${id}/inativar`, { method: "PUT" });
+      if (res.ok) {
+        toast("Formulário inativado.");
+        carregar();
+      } else {
+        toast("Erro ao inativar formulário.", "error");
+      }
+    } finally {
+      setInativando(null);
     }
   }
 
@@ -311,6 +327,16 @@ export default function AdminFormulariosPage() {
                         >
                           {ativando === f.id && <Loader2 size={14} className="animate-spin" />}
                           Ativar
+                        </button>
+                      )}
+                      {f.ativo === 1 && (
+                        <button
+                          onClick={() => inativar(f.id)}
+                          disabled={inativando === f.id}
+                          className="flex items-center gap-2 rounded-xl border border-amber-500 px-4 py-2 text-sm font-semibold text-amber-600 transition hover:bg-amber-50 disabled:opacity-50"
+                        >
+                          {inativando === f.id && <Loader2 size={14} className="animate-spin" />}
+                          Inativar
                         </button>
                       )}
 

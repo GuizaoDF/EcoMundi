@@ -382,10 +382,10 @@ export default function DiagnosticoPage() {
         <div className="max-w-md text-center">
           <ClipboardCheck className="w-12 h-12 text-[#173b22]/30 mx-auto mb-4" />
           <h2 className="font-serif text-2xl font-semibold text-[#173b22] mb-3">
-            Diagnóstico temporariamente indisponível
+            Diagnóstico em atualização
           </h2>
           <p className="text-[#4a5f50] mb-6">
-            Em breve este serviço estará disponível novamente.
+            Estamos preparando um novo formulário de diagnóstico. Em breve o serviço estará disponível novamente.
           </p>
           <Link
             href="/#contato"

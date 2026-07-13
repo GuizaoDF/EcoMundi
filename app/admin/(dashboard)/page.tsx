@@ -14,6 +14,8 @@ import {
   Globe,
   FileText,
   TrendingUp,
+  BookOpen,
+  ClipboardList,
 } from "lucide-react";
 
 interface Stats {
@@ -21,6 +23,8 @@ interface Stats {
   newsletter: { total: number; ativos: number };
   noticias: { total: number; publicadas: number; rascunhos: number };
   usuarios: { total: number; ativos: number };
+  ebooks: { ativos: number; total_downloads: number };
+  diagnostico: { total: number; pendentes: number };
 }
 
 interface ContatoRecente {
@@ -109,6 +113,22 @@ export default function DashboardPage() {
           color: "#6d28d9",
           href: "/admin/usuarios",
         },
+        {
+          label: "E-books ativos",
+          value: stats.ebooks.ativos,
+          sub: `${stats.ebooks.total_downloads} download${stats.ebooks.total_downloads !== 1 ? "s" : ""}`,
+          icon: <BookOpen size={22} />,
+          color: "#0369a1",
+          href: "/admin/ebooks",
+        },
+        {
+          label: "Diagnósticos realizados",
+          value: stats.diagnostico.total,
+          sub: `${stats.diagnostico.pendentes} convite${stats.diagnostico.pendentes !== 1 ? "s" : ""} pendente${stats.diagnostico.pendentes !== 1 ? "s" : ""}`,
+          icon: <ClipboardList size={22} />,
+          color: "#15803d",
+          href: "/admin/diagnostico",
+        },
       ]
     : [];
 
@@ -136,8 +156,8 @@ export default function DashboardPage() {
 
       {/* Cards de stats */}
       {carregando ? (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
             <div key={i} className="animate-pulse rounded-2xl border border-[#E6DED0] bg-white p-6">
               <div className="h-3 w-24 rounded bg-gray-200" />
               <div className="mt-4 h-9 w-16 rounded bg-gray-200" />
@@ -145,7 +165,7 @@ export default function DashboardPage() {
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {cards.map((c) => (
             <Link
               key={c.label}
@@ -336,12 +356,14 @@ export default function DashboardPage() {
             <h2 className="text-sm font-semibold text-[#0f3d2e]">Ações rápidas</h2>
           </div>
         </div>
-        <div className="grid grid-cols-2 divide-x divide-[#E6DED0] sm:grid-cols-4">
+        <div className="grid grid-cols-2 divide-x divide-y divide-[#E6DED0] sm:grid-cols-3 lg:grid-cols-6 lg:divide-y-0">
           {[
             { label: "Nova notícia", icon: <Plus size={20} />, href: "/admin/noticias/nova", color: "#0f3d2e" },
             { label: "Ver mensagens", icon: <Mail size={20} />, href: "/admin/contatos", color: "#b45309" },
             { label: "Newsletter", icon: <Send size={20} />, href: "/admin/newsletter", color: "#1d4ed8" },
             { label: "Usuários", icon: <Users size={20} />, href: "/admin/usuarios", color: "#6d28d9" },
+            { label: "Novo e-book", icon: <BookOpen size={20} />, href: "/admin/ebooks/nova", color: "#0369a1" },
+            { label: "Diagnóstico", icon: <ClipboardList size={20} />, href: "/admin/diagnostico", color: "#15803d" },
           ].map((a) => (
             <Link
               key={a.label}

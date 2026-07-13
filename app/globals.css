@@ -4,6 +4,22 @@
 
 @custom-variant dark (&:is(.dark *));
 
+body {
+  overflow-x: hidden;
+}
+
+.ProseMirror {
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  overflow-x: hidden !important;
+  max-width: 100% !important;
+}
+
+.ProseMirror p {
+  margin-top: 0 !important;
+  margin-bottom: 0.25em !important;
+}
+
 :root {
   --background: oklch(0.965 0.005 75);
   --foreground: oklch(0.2 0.02 150);

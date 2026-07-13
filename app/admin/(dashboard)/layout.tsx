@@ -66,7 +66,7 @@ export default function AdminLayout({
   return (
     <div className="flex min-h-screen bg-[#F7F5F0]">
       <Sidebar />
-      <div className="flex-1">
+      <div className="flex-1 min-w-0 overflow-x-hidden">
         <div className="p-10">
           <Header title={page.title} subtitle={page.subtitle} />
           {children}

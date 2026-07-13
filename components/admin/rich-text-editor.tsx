@@ -200,8 +200,8 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
             {placeholder}
           </p>
         )}
-        <div className="prose prose-sm max-w-none prose-headings:text-[#0f3d2e] prose-a:text-[#0f3d2e]">
-          <EditorContent editor={e} />
+        <div className="prose prose-sm max-w-none w-full overflow-hidden prose-headings:text-[#0f3d2e] prose-a:text-[#0f3d2e]">
+          <EditorContent editor={e} className="w-full min-w-0 overflow-hidden" />
         </div>
       </div>
     </div>

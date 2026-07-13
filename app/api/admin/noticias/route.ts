@@ -6,7 +6,7 @@ export async function GET() {
       SELECT
         id, titulo, slug, resumo,
         (imagem IS NOT NULL AND imagem != '') AS has_imagem,
-        publicado, criado_em, atualizado_em
+        publicado, newsletter_enviado_em, criado_em, atualizado_em
       FROM noticias
       ORDER BY criado_em DESC
     `);

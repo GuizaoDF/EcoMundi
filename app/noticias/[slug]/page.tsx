@@ -121,11 +121,10 @@ export default function NoticiaPage() {
 
             {/* Corpo do artigo */}
             {noticia.conteudo ? (
-              <div className="prose prose-lg max-w-none text-foreground">
-                <p className="whitespace-pre-wrap leading-relaxed">
-                  {noticia.conteudo}
-                </p>
-              </div>
+              <div
+                className="prose prose-lg max-w-none prose-headings:text-foreground prose-a:text-primary"
+                dangerouslySetInnerHTML={{ __html: noticia.conteudo }}
+              />
             ) : (
               <p className="text-muted-foreground">Conteúdo não disponível.</p>
             )}

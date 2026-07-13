@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Globe, FileText, CheckCircle2, XCircle, ImageIcon, X } from "lucide-react";
 import Link from "next/link";
+import RichTextEditor from "@/components/admin/rich-text-editor";
 
 interface Toast {
   id: number;
@@ -177,12 +178,10 @@ export default function NovaNoticiaPage() {
                 <p className="text-sm font-semibold text-[#0f3d2e]">Conteúdo</p>
               </div>
               <div className="p-6">
-                <textarea
-                  value={conteudo}
-                  onChange={(e) => setConteudo(e.target.value)}
-                  rows={18}
+                <RichTextEditor
+                  content={conteudo}
+                  onChange={setConteudo}
                   placeholder="Escreva o conteúdo completo da notícia aqui..."
-                  className="w-full resize-y rounded-xl border border-[#E6DED0] px-4 py-3 text-sm leading-relaxed outline-none transition focus:border-[#0f3d2e] focus:ring-2 focus:ring-[#0f3d2e]/10"
                 />
               </div>
             </div>

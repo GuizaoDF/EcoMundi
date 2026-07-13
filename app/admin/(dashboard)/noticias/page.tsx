@@ -10,6 +10,7 @@ import {
   Plus,
   Pencil,
   Trash2,
+  Send,
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
@@ -27,6 +28,7 @@ interface Noticia {
   resumo: string | null;
   has_imagem: number;
   publicado: number;
+  newsletter_enviado_em: string | null;
   criado_em: string;
   atualizado_em: string;
 }
@@ -53,7 +55,10 @@ export default function AdminNoticiasPage() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [selecionados, setSelecionados] = useState<Set<number>>(new Set());
   const [confirmandoExclusaoLote, setConfirmandoExclusaoLote] = useState(false);
+  const [confirmandoEnvioLote, setConfirmandoEnvioLote] = useState(false);
   const [confirmandoExclusaoId, setConfirmandoExclusaoId] = useState<number | null>(null);
+  const [confirmandoEnvioId, setConfirmandoEnvioId] = useState<number | null>(null);
+  const [enviandoId, setEnviandoId] = useState<number | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("criado_em");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [pagina, setPagina] = useState(1);
@@ -165,6 +170,27 @@ export default function AdminNoticiasPage() {
     toast(`${ids.length} notícia(s) excluída(s).`);
     setSelecionados(new Set());
     setConfirmandoExclusaoLote(false);
+  }
+
+  async function enviarNewsletter(id: number) {
+    setEnviandoId(id);
+    try {
+      const res = await fetch(`/api/admin/noticias/${id}/enviar-newsletter`, { method: "POST" });
+      const data = await res.json();
+      if (data.success) {
+        setNoticias((lista) =>
+          lista.map((n) => (n.id === id ? { ...n, newsletter_enviado_em: new Date().toISOString() } : n))
+        );
+        toast(data.message || "Newsletter enviada com sucesso.");
+      } else {
+        toast(data.message || "Erro ao enviar newsletter.", "error");
+      }
+    } catch {
+      toast("Erro ao enviar newsletter.", "error");
+    } finally {
+      setEnviandoId(null);
+      setConfirmandoEnvioId(null);
+    }
   }
 
   function toggleSelecionado(id: number) {
@@ -348,6 +374,48 @@ export default function AdminNoticiasPage() {
               >
                 <FileText size={13} /> Mover para rascunho
               </button>
+              {(() => {
+                const sel = selecionados.size === 1 ? noticias.find(n => selecionados.has(n.id)) : null;
+                const pode = !!sel?.publicado && !sel?.newsletter_enviado_em;
+                const title = !sel
+                  ? "Selecione apenas 1 notícia"
+                  : sel.newsletter_enviado_em
+                  ? "Newsletter já enviada"
+                  : !sel.publicado
+                  ? "Publique a notícia antes de enviar"
+                  : "Enviar newsletter";
+                return !confirmandoEnvioLote ? (
+                  <button
+                    onClick={() => pode && setConfirmandoEnvioLote(true)}
+                    disabled={!pode}
+                    title={title}
+                    className="flex items-center gap-1.5 rounded-lg border border-[#0f3d2e]/30 bg-white px-3 py-1.5 text-xs font-semibold text-[#0f3d2e] hover:bg-[#0f3d2e]/5 transition disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <Send size={13} /> Enviar newsletter
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={async () => {
+                        const id = Array.from(selecionados)[0];
+                        await enviarNewsletter(id);
+                        setConfirmandoEnvioLote(false);
+                        setSelecionados(new Set());
+                      }}
+                      disabled={!!enviandoId}
+                      className="rounded-lg bg-[#0f3d2e] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50 transition"
+                    >
+                      {enviandoId ? "Enviando..." : "Confirmar envio"}
+                    </button>
+                    <button
+                      onClick={() => setConfirmandoEnvioLote(false)}
+                      className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold hover:bg-gray-50 transition"
+                    >
+                      Cancelar
+                    </button>
+                  </>
+                );
+              })()}
               {!confirmandoExclusaoLote ? (
                 <button
                   onClick={() => setConfirmandoExclusaoLote(true)}
@@ -377,6 +445,7 @@ export default function AdminNoticiasPage() {
               onClick={() => {
                 setSelecionados(new Set());
                 setConfirmandoExclusaoLote(false);
+                setConfirmandoEnvioLote(false);
               }}
               className="ml-auto text-xs text-gray-400 hover:text-gray-600 transition"
             >
@@ -532,16 +601,51 @@ export default function AdminNoticiasPage() {
                             Cancelar
                           </button>
                         </div>
+                      ) : confirmandoEnvioId === noticia.id ? (
+                        <div className="flex items-center justify-end gap-2">
+                          <span className="text-xs text-gray-500">Enviar newsletter?</span>
+                          <button
+                            onClick={() => enviarNewsletter(noticia.id)}
+                            disabled={enviandoId === noticia.id}
+                            className="rounded-lg bg-[#0f3d2e] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50 transition"
+                          >
+                            {enviandoId === noticia.id ? "Enviando..." : "Confirmar"}
+                          </button>
+                          <button
+                            onClick={() => setConfirmandoEnvioId(null)}
+                            className="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold hover:bg-gray-50 transition"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
                       ) : (
                         <div className="flex items-center justify-end gap-1">
                           <button
-                            onClick={() =>
-                              router.push(`/admin/noticias/${noticia.id}/editar`)
-                            }
+                            onClick={() => router.push(`/admin/noticias/${noticia.id}/editar`)}
                             className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-gray-400 transition hover:bg-[#0f3d2e]/10 hover:text-[#0f3d2e]"
                             title="Editar"
                           >
                             <Pencil size={16} />
+                          </button>
+                          <button
+                            onClick={() => setConfirmandoEnvioId(noticia.id)}
+                            disabled={!noticia.publicado || !!noticia.newsletter_enviado_em}
+                            title={
+                              noticia.newsletter_enviado_em
+                                ? `Newsletter enviada em ${new Date(noticia.newsletter_enviado_em).toLocaleDateString("pt-BR")}`
+                                : !noticia.publicado
+                                ? "Publique a notícia antes de enviar"
+                                : "Enviar newsletter"
+                            }
+                            className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition ${
+                              noticia.newsletter_enviado_em
+                                ? "text-green-500 cursor-default"
+                                : !noticia.publicado
+                                ? "text-gray-300 cursor-not-allowed"
+                                : "text-gray-400 hover:bg-[#0f3d2e]/10 hover:text-[#0f3d2e]"
+                            }`}
+                          >
+                            <Send size={16} />
                           </button>
                           <button
                             onClick={() => setConfirmandoExclusaoId(noticia.id)}

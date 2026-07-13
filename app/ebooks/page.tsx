@@ -307,7 +307,7 @@ export default function EbooksPage() {
                         setEmail(e.target.value);
                         if (emailError) setEmailError(validateEmail(e.target.value));
                       }}
-                      placeholder="Seu melhor e-mail"
+                      placeholder="Seu e-mail"
                       disabled={modal.status === "loading"}
                       className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:ring-2 focus:ring-primary/10 ${emailError ? "border-red-400 focus:border-red-400" : "border-border focus:border-primary"}`}
                     />

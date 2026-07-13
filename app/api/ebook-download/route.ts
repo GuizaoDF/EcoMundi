@@ -1,7 +1,9 @@
 import { NextRequest } from "next/server";
+import nodemailer from "nodemailer";
 import db from "@/lib/db";
 import { isValidFormat, isValidMx } from "@/lib/email-validator";
 import { verifyHcaptcha } from "@/lib/hcaptcha";
+import { generateUnsubscribeToken } from "@/lib/unsubscribe-token";
 
 export async function POST(req: NextRequest) {
   try {
@@ -37,21 +39,112 @@ export async function POST(req: NextRequest) {
       return Response.json({ success: false, message: "E-book não encontrado." }, { status: 404 });
     }
 
-    await db.execute(
-      "INSERT INTO ebook_downloads (ebook_id, nome, email, inscrito_newsletter) VALUES (?, ?, ?, ?)",
-      [ebook_id, nome.trim(), email.trim().toLowerCase(), inscrito_newsletter ? 1 : 0]
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Só registra download se ainda não existe para este e-mail + ebook
+    const [existing]: any = await db.execute(
+      "SELECT id FROM ebook_downloads WHERE ebook_id = ? AND email = ?",
+      [ebook_id, normalizedEmail]
     );
+    if (!(existing as any[])[0]) {
+      await db.execute(
+        "INSERT INTO ebook_downloads (ebook_id, nome, email, inscrito_newsletter) VALUES (?, ?, ?, ?)",
+        [ebook_id, nome.trim(), normalizedEmail, inscrito_newsletter ? 1 : 0]
+      );
+    }
 
     if (inscrito_newsletter) {
-      const [existing]: any = await db.execute(
+      const [newsletterRows]: any = await db.execute(
         "SELECT id, ativo FROM newsletter WHERE email = ?",
-        [email.trim().toLowerCase()]
+        [normalizedEmail]
       );
-      const row = (existing as any[])[0];
+      const row = (newsletterRows as any[])[0];
+      let isNewSubscriber = false;
+
       if (!row) {
-        await db.execute("INSERT INTO newsletter (email) VALUES (?)", [email.trim().toLowerCase()]);
+        await db.execute("INSERT INTO newsletter (email) VALUES (?)", [normalizedEmail]);
+        isNewSubscriber = true;
       } else if (row.ativo === 0) {
-        await db.execute("UPDATE newsletter SET ativo = 1 WHERE email = ?", [email.trim().toLowerCase()]);
+        await db.execute("UPDATE newsletter SET ativo = 1 WHERE email = ?", [normalizedEmail]);
+        isNewSubscriber = true;
+      }
+
+      if (isNewSubscriber) {
+        try {
+          const unsubToken = await generateUnsubscribeToken(normalizedEmail);
+          const siteUrl = process.env.SITE_URL ?? "https://ecomundi.com.br";
+          const unsubscribeUrl = `${siteUrl}/cancelar-inscricao/${unsubToken}`;
+
+          const transporter = nodemailer.createTransport({
+            host: process.env.EMAIL_HOST,
+            port: Number(process.env.EMAIL_PORT),
+            secure: true,
+            auth: {
+              user: process.env.EMAIL_USER,
+              pass: process.env.EMAIL_PASS,
+            },
+          });
+
+          await transporter.sendMail({
+            from: `"ECO MUNDI" <${process.env.EMAIL_USER}>`,
+            to: normalizedEmail,
+            subject: "Bem-vindo(a) à newsletter da ECO MUNDI",
+            html: `
+              <!DOCTYPE html>
+              <html lang="pt-BR">
+              <body style="margin:0;padding:0;background-color:#f7f5f0;font-family:Arial,Helvetica,sans-serif;">
+                <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f7f5f0;padding:40px 20px;">
+                  <tr>
+                    <td align="center">
+                      <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e5e0d8;">
+                        <tr>
+                          <td style="background:#ffffff;padding:22px;text-align:center;border-bottom:4px solid #0f3d2e;">
+                            <img src="https://ecomundi.com.br/logo.png" alt="ECO MUNDI" width="200" style="max-width:200px;width:200px;height:auto;display:block;margin:0 auto;" />
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding:36px 36px 28px 36px;">
+                            <h2 style="margin:0 0 12px 0;color:#0f3d2e;font-size:24px;font-weight:bold;">
+                              Inscrição confirmada!
+                            </h2>
+                            <p style="margin:0 0 20px 0;color:#333333;font-size:15px;line-height:1.8;">
+                              Obrigado por se inscrever na newsletter da <strong>ECO MUNDI</strong>.
+                              A partir de agora você receberá em primeira mão nossos conteúdos sobre:
+                            </p>
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f5f0;border-radius:12px;padding:20px 24px;margin-bottom:28px;">
+                              <tr>
+                                <td style="color:#333333;font-size:15px;line-height:2;">
+                                  <p style="margin:0;">🌿 &nbsp;Direito ambiental</p>
+                                  <p style="margin:0;">📊 &nbsp;Sustentabilidade e ESG</p>
+                                  <p style="margin:0;">💼 &nbsp;Oportunidades de negócios sustentáveis</p>
+                                  <p style="margin:0;">⚖️ &nbsp;Regulação e licenciamento ambiental</p>
+                                </td>
+                              </tr>
+                            </table>
+                            <div style="text-align:center;">
+                              <a href="https://ecomundi.com.br" style="display:inline-block;background:#0f3d2e;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:10px;font-weight:bold;font-size:15px;">
+                                Visitar o site
+                              </a>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="background:#f1eee8;padding:18px 36px;text-align:center;font-size:12px;color:#888888;line-height:1.6;">
+                            Você recebeu este e-mail porque se inscreveu na newsletter da ECO MUNDI.<br/>
+                            Para cancelar sua inscrição, <a href="${unsubscribeUrl}" style="color:#0f3d2e;text-decoration:underline;">clique aqui</a>.
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </body>
+              </html>
+            `,
+          });
+        } catch (emailErr) {
+          console.error("Erro ao enviar e-mail de boas-vindas:", emailErr);
+        }
       }
     }
 

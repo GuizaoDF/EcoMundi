@@ -26,6 +26,14 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
     title: "Nova Notícia",
     subtitle: "Preencha os dados da nova publicação.",
   },
+  "/admin/ebooks": {
+    title: "E-books",
+    subtitle: "Gerencie os e-books disponíveis para download.",
+  },
+  "/admin/ebooks/nova": {
+    title: "Novo E-book",
+    subtitle: "Cadastre um novo e-book para download.",
+  },
   "/admin/usuarios": {
     title: "Usuários",
     subtitle: "Controle de acesso ao painel administrativo.",
@@ -46,6 +54,8 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
 
 function getPageInfo(pathname: string) {
   if (pageTitles[pathname]) return pageTitles[pathname];
+  if (/^\/admin\/ebooks\/\d+\/editar$/.test(pathname))
+    return { title: "Editar E-book", subtitle: "Atualize os dados do e-book." };
   if (/^\/admin\/noticias\/\d+\/editar$/.test(pathname))
     return { title: "Editar Notícia", subtitle: "Atualize os dados da publicação." };
   if (/^\/admin\/diagnostico\/resultados\/\d+$/.test(pathname))

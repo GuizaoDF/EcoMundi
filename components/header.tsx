@@ -12,6 +12,7 @@ const navItems = [
   { href: "#servicos", label: "Serviços" },
   { label: "Profissionais", href: "#profissionais" },
   { href: "/noticias", label: "Notícias" },
+  { href: "/ebooks", label: "E-books" },
   { href: "#contato", label: "Contato" },
 ];
 

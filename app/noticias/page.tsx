@@ -39,14 +39,14 @@ export default function NoticiasPage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-20 sm:h-24 lg:h-28 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" aria-label="ECO MUNDI - Página inicial">
             <Image
               src="/images/logo-eco-mundi-site.png"
               alt="ECO MUNDI Consultoria e Gestão"
               width={659}
               height={184}
-              className="h-14 w-auto"
+              className="h-16 sm:h-20 lg:h-24 w-auto"
               priority
             />
           </Link>
@@ -61,7 +61,7 @@ export default function NoticiasPage() {
       </header>
 
       {/* Hero */}
-      <section className="bg-gradient-to-b from-primary/5 to-background py-16 sm:py-20">
+      <section className="bg-gradient-to-b from-primary/5 to-background pt-8 pb-16 sm:pt-10 sm:pb-20">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-primary">
             Blog & Notícias

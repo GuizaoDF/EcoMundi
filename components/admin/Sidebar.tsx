@@ -13,6 +13,7 @@ import {
   ClipboardList,
   ClipboardCheck,
   MailPlus,
+  BookOpen,
 } from "lucide-react";
 
 const menu = [
@@ -20,6 +21,7 @@ const menu = [
   { section: "CONTEÚDO" },
   { title: "Notícias", icon: Newspaper, href: "/admin/noticias" },
   { title: "Newsletter", icon: Send, href: "/admin/newsletter" },
+  { title: "E-books", icon: BookOpen, href: "/admin/ebooks" },
   { section: "RELACIONAMENTO" },
   { title: "Contatos", icon: Mail, href: "/admin/contatos" },
   { section: "DIAGNÓSTICO" },

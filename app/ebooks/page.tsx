@@ -215,7 +215,7 @@ export default function EbooksPage() {
                       onClick={() => openModal(eb)}
                       className="mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
                     >
-                      <Download size={16} /> Baixar grátis
+                      <Download size={16} /> Download grátis
                     </button>
                   </div>
                 </div>
@@ -272,7 +272,7 @@ export default function EbooksPage() {
               <>
                 <div className="mb-6 flex items-start justify-between">
                   <div>
-                    <h3 className="font-serif text-xl font-semibold text-foreground">Baixar e-book</h3>
+                    <h3 className="font-serif text-xl font-semibold text-foreground">Download e-book</h3>
                     <p className="mt-1 text-sm text-muted-foreground">{modal.ebook.titulo}</p>
                   </div>
                   <button
@@ -347,12 +347,12 @@ export default function EbooksPage() {
                     {modal.status === "loading" ? (
                       <><Loader2 size={16} className="animate-spin" /> Processando...</>
                     ) : (
-                      <><Download size={16} /> Baixar grátis</>
+                      <><Download size={16} /> Download grátis</>
                     )}
                   </button>
 
                   <p className="text-center text-xs text-muted-foreground">
-                    Ao baixar, você concorda com nossa política de privacidade.
+                    Ao fazer o download, você concorda com nossa política de privacidade.
                   </p>
                 </form>
               </>

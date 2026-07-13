@@ -53,6 +53,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!inscrito_newsletter) {
+      await db.execute(
+        "UPDATE newsletter SET ativo = 0 WHERE email = ? AND ativo = 1",
+        [normalizedEmail]
+      );
+    }
+
     if (inscrito_newsletter) {
       const [newsletterRows]: any = await db.execute(
         "SELECT id, ativo FROM newsletter WHERE email = ?",

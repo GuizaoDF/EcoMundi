@@ -86,7 +86,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
     },
     editorProps: {
       attributes: {
-        class: "min-h-[380px] px-4 py-3 text-sm leading-relaxed outline-none",
+        class: "min-h-[380px] w-full px-4 py-3 text-sm leading-relaxed outline-none break-words overflow-hidden",
       },
     },
   });
@@ -194,7 +194,7 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
       </div>
 
       {/* Editor area */}
-      <div className="relative bg-white">
+      <div className="relative w-full overflow-hidden bg-white">
         {e.isEmpty && placeholder && (
           <p className="pointer-events-none absolute left-4 top-3 text-sm text-gray-400">
             {placeholder}

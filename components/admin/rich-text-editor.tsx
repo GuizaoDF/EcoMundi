@@ -17,6 +17,7 @@ import {
   AlignLeft,
   AlignCenter,
   AlignRight,
+  AlignJustify,
   List,
   ListOrdered,
   Quote,
@@ -163,6 +164,9 @@ export default function RichTextEditor({ content, onChange, placeholder }: RichT
         </ToolbarButton>
         <ToolbarButton onClick={() => e.chain().focus().setTextAlign("right").run()} active={e.isActive({ textAlign: "right" })} title="Alinhar à direita">
           <AlignRight size={15} />
+        </ToolbarButton>
+        <ToolbarButton onClick={() => e.chain().focus().setTextAlign("justify").run()} active={e.isActive({ textAlign: "justify" })} title="Justificar">
+          <AlignJustify size={15} />
         </ToolbarButton>
 
         <Sep />

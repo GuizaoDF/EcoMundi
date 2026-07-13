@@ -134,7 +134,7 @@ export function Ebooks() {
                     onClick={() => openModal(eb)}
                     className="mt-auto flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:opacity-90"
                   >
-                    <Download size={16} /> Download grátis
+                    <Download size={16} /> Download gratuito
                   </button>
                 </div>
               </div>
@@ -232,7 +232,7 @@ export function Ebooks() {
                     {modal.status === "loading" ? (
                       <><Loader2 size={16} className="animate-spin" /> Processando...</>
                     ) : (
-                      <><Download size={16} /> Download grátis</>
+                      <><Download size={16} /> Download gratuito</>
                     )}
                   </button>
 

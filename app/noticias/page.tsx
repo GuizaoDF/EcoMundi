@@ -67,7 +67,7 @@ export default function NoticiasPage() {
             Blog & Notícias
           </p>
           <h1 className="mb-6 text-balance font-serif text-4xl font-semibold text-foreground sm:text-5xl">
-            Fique por dentro do Direito Ambiental
+            Fique por dentro
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
             Artigos, análises e atualizações sobre legislação ambiental, ESG,
@@ -158,7 +158,7 @@ export default function NoticiasPage() {
       <footer className="border-t border-border py-8">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} ECO MUNDI Advocacia. Todos os direitos reservados.
+            &copy; {new Date().getFullYear()} ECO MUNDI. Todos os direitos reservados.
           </p>
         </div>
       </footer>

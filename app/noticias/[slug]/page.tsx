@@ -147,7 +147,7 @@ export default function NoticiaPage() {
       <footer className="border-t border-border py-8">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} ECO MUNDI Advocacia. Todos os direitos reservados.
+            &copy; {new Date().getFullYear()} ECO MUNDI. Todos os direitos reservados.
           </p>
         </div>
       </footer>

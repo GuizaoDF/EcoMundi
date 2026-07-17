@@ -125,6 +125,26 @@ function validateEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 }
 
+function formatCnpj(value: string) {
+  const d = value.replace(/\D/g, "").slice(0, 14);
+  if (d.length <= 2) return d;
+  if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`;
+  if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`;
+  if (d.length <= 12) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`;
+  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`;
+}
+
+function validateCnpj(value: string) {
+  const d = value.replace(/\D/g, "");
+  if (d.length !== 14 || /^(\d)\1+$/.test(d)) return false;
+  const calc = (s: string, len: number) => {
+    let sum = 0, pos = len - 7;
+    for (let i = len; i >= 1; i--) { sum += parseInt(s[len - i]) * pos--; if (pos < 2) pos = 9; }
+    return sum % 11 < 2 ? 0 : 11 - (sum % 11);
+  };
+  return calc(d, 12) === parseInt(d[12]) && calc(d, 13) === parseInt(d[13]);
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function DiagnosticoPage() {
@@ -147,6 +167,8 @@ export default function DiagnosticoPage() {
   // Identificação da empresa
   const [razaoSocial, setRazaoSocial] = useState("");
   const [cnpj, setCnpj] = useState("");
+  const [cnpjError, setCnpjError] = useState("");
+  const [cnpjTouched, setCnpjTouched] = useState(false);
   const [telefone, setTelefone] = useState("");
   const [camposPerfil, setCamposPerfil] = useState<CampoPerfil[]>([]);
   const [dadosPerfil, setDadosPerfil] = useState<Record<string, string | boolean>>({});
@@ -285,6 +307,10 @@ export default function DiagnosticoPage() {
     if (etapa === "perguntas") {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
+    if (etapa === "perguntas" && stepIndex === totalSteps - 1) {
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
+    }
   }, [stepIndex, etapa]);
 
   function avancarPerguntas() {
@@ -419,9 +445,6 @@ export default function DiagnosticoPage() {
             <div className="text-6xl sm:text-7xl font-bold text-[#173b22] mb-2">
               {resultado.percentual.toFixed(1)}%
             </div>
-            <p className="text-[#4a5f50] text-sm mb-6">
-              {resultado.pontuacao_total} de {resultado.pontuacao_maxima} pontos
-            </p>
             {/* Barra de progresso */}
             <div className="w-full bg-[#f7f7f2] rounded-full h-4 overflow-hidden">
               <div
@@ -571,16 +594,6 @@ export default function DiagnosticoPage() {
                 )}
               </div>
 
-              <div className="pt-2">
-                <HCaptcha
-                  ref={captchaRef}
-                  sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
-                  onVerify={setCaptchaToken}
-                  onExpire={() => setCaptchaToken(null)}
-                  theme="light"
-                />
-              </div>
-
               {erro && (
                 <div className="flex items-start gap-2 text-red-600 text-sm bg-red-50 rounded-lg p-3">
                   <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -596,13 +609,12 @@ export default function DiagnosticoPage() {
                     setEmailError("Digite um e-mail válido.");
                     return;
                   }
-                  if (!captchaToken) { setErro("Complete a verificação de segurança."); return; }
                   setErro(null);
                   setEtapa("identificacao");
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
                 className="w-full bg-[#173b22] hover:bg-[#0f2a18] text-white font-semibold py-3 h-auto rounded-xl"
-                disabled={!nome || !email || !captchaToken}
+                disabled={!nome || !email}
               >
                 Próximo
                 <ArrowRight className="w-4 h-4 ml-2" />
@@ -649,10 +661,34 @@ export default function DiagnosticoPage() {
                 <Input
                   id="cnpj"
                   value={cnpj}
-                  onChange={(e) => setCnpj(e.target.value)}
+                  onChange={(e) => {
+                    const formatted = formatCnpj(e.target.value);
+                    setCnpj(formatted);
+                    if (cnpjTouched) {
+                      setCnpjError(
+                        formatted.replace(/\D/g, "").length === 14 && !validateCnpj(formatted)
+                          ? "CNPJ inválido."
+                          : ""
+                      );
+                    }
+                  }}
+                  onBlur={() => {
+                    setCnpjTouched(true);
+                    if (!cnpj.trim()) { setCnpjError(""); return; }
+                    setCnpjError(validateCnpj(cnpj) ? "" : "CNPJ inválido.");
+                  }}
                   placeholder="00.000.000/0000-00"
-                  className="border-[#dfe7d8] focus-visible:ring-emerald-400/30 focus-visible:border-emerald-400"
+                  className={`border-[#dfe7d8] focus-visible:ring-emerald-400/30 focus-visible:border-emerald-400 ${
+                    cnpjTouched && cnpjError
+                      ? "border-red-400 focus-visible:border-red-400"
+                      : cnpjTouched && cnpj && !cnpjError
+                      ? "border-emerald-400"
+                      : ""
+                  }`}
                 />
+                {cnpjTouched && cnpjError && (
+                  <p className="text-red-500 text-xs mt-1">{cnpjError}</p>
+                )}
               </div>
 
               {/* Telefone */}
@@ -777,6 +813,12 @@ export default function DiagnosticoPage() {
                       setErro("Razão social e CNPJ são obrigatórios.");
                       return;
                     }
+                    if (!validateCnpj(cnpj)) {
+                      setCnpjTouched(true);
+                      setCnpjError("CNPJ inválido.");
+                      setErro("Verifique os campos antes de continuar.");
+                      return;
+                    }
                     for (const campo of camposPerfil.filter((c) => c.obrigatorio)) {
                       const val = dadosPerfil[campo.id];
                       const vazio = campo.tipo === "boolean"
@@ -889,6 +931,18 @@ export default function DiagnosticoPage() {
               ))}
             </div>
 
+            {stepIndex === totalSteps - 1 && (
+              <div className="pt-2">
+                <HCaptcha
+                  ref={captchaRef}
+                  sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
+                  onVerify={setCaptchaToken}
+                  onExpire={() => setCaptchaToken(null)}
+                  theme="light"
+                />
+              </div>
+            )}
+
             {erro && (
               <div className="flex items-start gap-2 text-red-600 text-sm bg-red-50 rounded-lg p-3 mt-4">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -916,7 +970,7 @@ export default function DiagnosticoPage() {
               </Button>
               <Button
                 onClick={avancarPerguntas}
-                disabled={!todasRespondidas() || enviando}
+                disabled={!todasRespondidas() || enviando || (stepIndex === totalSteps - 1 && !captchaToken)}
                 className="flex-1 bg-[#173b22] hover:bg-[#0f2a18] text-white font-semibold py-3 h-auto rounded-xl disabled:opacity-40"
               >
                 {enviando ? (

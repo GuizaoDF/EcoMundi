@@ -241,7 +241,6 @@ export default function PerguntasFormularioPage() {
     setEditandoPergunta(p.id);
     setEditPergTexto(p.texto);
     const alts = [...p.alternativas].sort((a, b) => a.ordem - b.ordem);
-    while (alts.length < 5) alts.push({ id: undefined as any, texto: "", pontuacao: alts.length, ordem: alts.length + 1 });
     setEditAlternativas(alts.map((a) => ({ id: a.id, texto: a.texto, pontuacao: a.pontuacao, ordem: a.ordem })));
     setExpandida(p.id);
   }
@@ -261,9 +260,6 @@ export default function PerguntasFormularioPage() {
     setEditAlternativas([
       { texto: "", pontuacao: 0, ordem: 1 },
       { texto: "", pontuacao: 1, ordem: 2 },
-      { texto: "", pontuacao: 2, ordem: 3 },
-      { texto: "", pontuacao: 3, ordem: 4 },
-      { texto: "", pontuacao: 4, ordem: 5 },
     ]);
     if (categoriaAtiva) carregarPerguntasExistentes(categoriaAtiva);
   }
@@ -272,6 +268,7 @@ export default function PerguntasFormularioPage() {
     if (!editPergTexto.trim() || !categoriaAtiva) return;
     setSalvando(true);
     try {
+      const altsValidas = editAlternativas.filter((a) => a.texto.trim());
       if (editandoPergunta) {
         const res = await fetch(`/api/admin/diagnostico/perguntas/${editandoPergunta}`, {
           method: "PUT",
@@ -298,7 +295,7 @@ export default function PerguntasFormularioPage() {
             categoria_id: categoriaAtiva,
             texto: editPergTexto,
             ordem: perguntas.length + 1,
-            alternativas: editAlternativas,
+            alternativas: altsValidas,
           }),
         });
         const data = await res.json();
@@ -791,12 +788,32 @@ function EditPerguntaForm({
 }) {
   const SCORE_LABELS = ["R1", "R2", "R3", "R4", "R5"];
 
+  // Existing alts with empty text are scheduled for deletion — treat as invisible
+  const isRemovida = (a: (typeof alternativas)[0]) => !!a.id && !a.texto.trim();
+  const visiveisCount = alternativas.filter((a) => !isRemovida(a)).length;
+
   function updateAlt(i: number, field: "texto" | "pontuacao", value: string | number) {
-    const next = alternativas.map((a, idx) =>
-      idx === i ? { ...a, [field]: value } : a
-    );
-    onAlternativasChange(next);
+    onAlternativasChange(alternativas.map((a, idx) => idx === i ? { ...a, [field]: value } : a));
   }
+
+  function removeAlt(i: number) {
+    if (visiveisCount <= 2) return;
+    const alt = alternativas[i];
+    if (alt.id) {
+      // sinaliza deleção via texto vazio; a API faz o DELETE
+      onAlternativasChange(alternativas.map((a, idx) => idx === i ? { ...a, texto: "" } : a));
+    } else {
+      onAlternativasChange(alternativas.filter((_, idx) => idx !== i));
+    }
+  }
+
+  function addAlt() {
+    if (visiveisCount >= 5) return;
+    const maxOrdem = alternativas.reduce((m, a) => Math.max(m, a.ordem), 0);
+    onAlternativasChange([...alternativas, { texto: "", pontuacao: visiveisCount, ordem: maxOrdem + 1 }]);
+  }
+
+  let visIdx = -1;
 
   return (
     <div className="space-y-4">
@@ -813,32 +830,58 @@ function EditPerguntaForm({
       </div>
 
       <div>
-        <label className="mb-2 block text-xs font-semibold text-gray-600">Alternativas (5 fixas)</label>
+        <label className="mb-2 block text-xs font-semibold text-gray-600">
+          Alternativas ({visiveisCount}/5)
+        </label>
         <div className="space-y-2">
-          {alternativas.slice(0, 5).map((alt, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <span className="w-8 shrink-0 text-xs font-bold text-[#0f3d2e]">{SCORE_LABELS[i]}</span>
-              <input
-                type="text"
-                value={alt.texto}
-                onChange={(e) => updateAlt(i, "texto", e.target.value)}
-                className="h-9 flex-1 rounded-lg border border-[#E6DED0] px-3 text-sm outline-none focus:border-[#0f3d2e]"
-                placeholder={`Alternativa ${SCORE_LABELS[i]}...`}
-              />
-              <select
-                value={alt.pontuacao}
-                onChange={(e) => updateAlt(i, "pontuacao", Number(e.target.value))}
-                className="h-9 w-20 rounded-lg border border-[#E6DED0] px-2 text-sm outline-none focus:border-[#0f3d2e]"
-              >
-                <option value={0}>0 pts</option>
-                <option value={1}>1 pt</option>
-                <option value={2}>2 pts</option>
-                <option value={3}>3 pts</option>
-                <option value={4}>4 pts</option>
-              </select>
-            </div>
-          ))}
+          {alternativas.map((alt, i) => {
+            if (isRemovida(alt)) return null;
+            visIdx++;
+            const vi = visIdx;
+            return (
+              <div key={i} className="flex items-center gap-3">
+                <span className="w-8 shrink-0 text-xs font-bold text-[#0f3d2e]">{SCORE_LABELS[vi]}</span>
+                <input
+                  type="text"
+                  value={alt.texto}
+                  onChange={(e) => updateAlt(i, "texto", e.target.value)}
+                  className="h-9 flex-1 rounded-lg border border-[#E6DED0] px-3 text-sm outline-none focus:border-[#0f3d2e]"
+                  placeholder={`Alternativa ${SCORE_LABELS[vi]}...`}
+                />
+                <select
+                  value={alt.pontuacao}
+                  onChange={(e) => updateAlt(i, "pontuacao", Number(e.target.value))}
+                  className="h-9 w-20 rounded-lg border border-[#E6DED0] px-2 text-sm outline-none focus:border-[#0f3d2e]"
+                >
+                  <option value={0}>0 pts</option>
+                  <option value={1}>1 pt</option>
+                  <option value={2}>2 pts</option>
+                  <option value={3}>3 pts</option>
+                  <option value={4}>4 pts</option>
+                </select>
+                <button
+                  type="button"
+                  onClick={() => removeAlt(i)}
+                  disabled={visiveisCount <= 2}
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[#E6DED0] text-gray-400 transition hover:border-red-300 hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-30"
+                  title="Remover alternativa"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            );
+          })}
         </div>
+        {visiveisCount < 5 && (
+          <button
+            type="button"
+            onClick={addAlt}
+            className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-[#0f3d2e] hover:underline"
+          >
+            <Plus size={13} />
+            Adicionar alternativa
+          </button>
+        )}
       </div>
 
       <div className="flex gap-3">

@@ -88,7 +88,6 @@ async function sendDiagnosticoEmails(params: {
                       <td>
                         <p style="margin:0 0 4px 0;font-size:13px;color:${cores.text};font-weight:bold;text-transform:uppercase;letter-spacing:1px;">${escapeHtml(params.classificacao)}</p>
                         <p style="margin:0 0 4px 0;font-size:48px;font-weight:bold;color:${cores.text};">${params.percentual.toFixed(0)}%</p>
-                        <p style="margin:0;font-size:14px;color:${cores.text};">${params.pontuacaoTotal} de ${params.pontuacaoMaxima} pontos possíveis</p>
                         <div style="background:rgba(0,0,0,0.1);border-radius:4px;height:8px;margin:12px auto 0;max-width:300px;">
                           <div style="background:${barCor};width:${params.percentual.toFixed(0)}%;height:8px;border-radius:4px;"></div>
                         </div>

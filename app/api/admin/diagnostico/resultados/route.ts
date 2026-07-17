@@ -46,9 +46,11 @@ export async function GET(req: Request) {
       `SELECT r.id, r.nome, r.email, r.razao_social, r.cnpj,
               r.classificacao, r.percentual, r.pontuacao_total, r.pontuacao_maxima,
               r.email_enviado, r.criado_em,
-              f.nome AS formulario_nome
+              f.nome AS formulario_nome,
+              IF(c.id IS NOT NULL, 'convite', 'site') AS origem
        FROM diagnostico_resultados r
        JOIN diagnostico_formularios f ON f.id = r.formulario_id
+       LEFT JOIN diagnostico_convites c ON c.resultado_id = r.id
        ${where}
        ORDER BY r.criado_em DESC
        LIMIT ? OFFSET ?`,

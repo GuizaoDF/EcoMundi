@@ -47,12 +47,20 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
     if (Array.isArray(alternativas)) {
       for (const alt of alternativas) {
+        const textoVazio = !alt.texto?.trim();
         if (alt.id) {
-          await db.execute(
-            "UPDATE diagnostico_alternativas SET texto = ?, pontuacao = ?, ordem = ? WHERE id = ? AND pergunta_id = ?",
-            [alt.texto, alt.pontuacao ?? 0, alt.ordem ?? 0, alt.id, id]
-          );
-        } else {
+          if (textoVazio) {
+            await db.execute(
+              "DELETE FROM diagnostico_alternativas WHERE id = ? AND pergunta_id = ?",
+              [alt.id, id]
+            );
+          } else {
+            await db.execute(
+              "UPDATE diagnostico_alternativas SET texto = ?, pontuacao = ?, ordem = ? WHERE id = ? AND pergunta_id = ?",
+              [alt.texto, alt.pontuacao ?? 0, alt.ordem ?? 0, alt.id, id]
+            );
+          }
+        } else if (!textoVazio) {
           await db.execute(
             "INSERT INTO diagnostico_alternativas (pergunta_id, texto, pontuacao, ordem) VALUES (?, ?, ?, ?)",
             [id, alt.texto, alt.pontuacao ?? 0, alt.ordem ?? 0]

@@ -105,9 +105,10 @@ export async function POST(req: Request) {
 
     const perguntaId = result.insertId;
 
-    if (Array.isArray(alternativas) && alternativas.length > 0) {
-      const placeholders = alternativas.map(() => "(?, ?, ?, ?)").join(",");
-      const values = alternativas.flatMap((a: any) => [
+    const altsValidas = Array.isArray(alternativas) ? alternativas.filter((a: any) => a.texto?.trim()) : [];
+    if (altsValidas.length > 0) {
+      const placeholders = altsValidas.map(() => "(?, ?, ?, ?)").join(",");
+      const values = altsValidas.flatMap((a: any) => [
         perguntaId, a.texto, a.pontuacao ?? 0, a.ordem ?? 0,
       ]);
       await db.execute(

@@ -11,6 +11,8 @@ import {
   Eye,
   CheckCircle2,
   XCircle,
+  Mail,
+  Globe,
 } from "lucide-react";
 import Card from "@/components/admin/Card";
 import {
@@ -55,6 +57,7 @@ interface Resultado {
   pontuacao_maxima: number;
   formulario_nome: string;
   criado_em: string;
+  origem: "convite" | "site";
 }
 
 interface Toast {
@@ -305,6 +308,7 @@ export default function AdminDiagnosticoPage() {
                   <th className="px-4 py-4 text-left text-xs font-semibold text-[#4a5f50] uppercase tracking-wider">Classificação</th>
                   <th className="px-4 py-4 text-left text-xs font-semibold text-[#4a5f50] uppercase tracking-wider">%</th>
                   <th className="hidden px-4 py-4 text-left text-xs font-semibold text-[#4a5f50] uppercase tracking-wider lg:table-cell">Formulário</th>
+                  <th className="hidden px-4 py-4 text-left text-xs font-semibold text-[#4a5f50] uppercase tracking-wider lg:table-cell">Origem</th>
                   <th className="px-4 py-4 text-left text-xs font-semibold text-[#4a5f50] uppercase tracking-wider">Data</th>
                   <th className="px-4 py-4 text-right text-xs font-semibold text-[#4a5f50] uppercase tracking-wider" />
                 </tr>
@@ -331,8 +335,19 @@ export default function AdminDiagnosticoPage() {
                       </td>
                       <td className="px-4 py-4 font-semibold text-[#0f3d2e]">{parseFloat(String(r.percentual)).toFixed(1)}%</td>
                       <td className="hidden px-4 py-4 text-gray-500 lg:table-cell">{r.formulario_nome}</td>
+                      <td className="hidden px-4 py-4 lg:table-cell">
+                        {r.origem === "convite" ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-2.5 py-1 text-xs font-semibold text-purple-700">
+                            <Mail size={11} /> Convite
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-100 px-2.5 py-1 text-xs font-semibold text-sky-700">
+                            <Globe size={11} /> Site
+                          </span>
+                        )}
+                      </td>
                       <td className="whitespace-nowrap px-4 py-4 text-gray-500">
-                        {new Date(r.criado_em).toLocaleDateString("pt-BR")}
+                        {new Date(r.criado_em).toLocaleString("pt-BR")}
                       </td>
                       <td className="px-4 py-4 text-right">
                         <Link
@@ -349,7 +364,7 @@ export default function AdminDiagnosticoPage() {
 
                 {resultados.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="py-16 text-center">
+                    <td colSpan={8} className="py-16 text-center">
                       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
                         <ClipboardList size={28} className="text-gray-400" />
                       </div>

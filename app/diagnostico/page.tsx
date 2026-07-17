@@ -932,7 +932,7 @@ export default function DiagnosticoPage() {
             </div>
 
             {stepIndex === totalSteps - 1 && (
-              <div className="pt-2">
+              <div className="pt-2 flex justify-center">
                 <HCaptcha
                   ref={captchaRef}
                   sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}

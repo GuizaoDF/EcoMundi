@@ -145,6 +145,22 @@ function validateCnpj(value: string) {
   return calc(d, 12) === parseInt(d[12]) && calc(d, 13) === parseInt(d[13]);
 }
 
+function formatTelefone(value: string) {
+  const d = value.replace(/\D/g, "").slice(0, 11);
+  if (d.length === 0) return "";
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+}
+
+function validateTelefone(value: string) {
+  const d = value.replace(/\D/g, "");
+  return d.length === 10 || d.length === 11;
+}
+
+const STORAGE_KEY = "ecomundi_diagnostico";
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 export default function DiagnosticoPage() {
@@ -170,6 +186,14 @@ export default function DiagnosticoPage() {
   const [cnpjError, setCnpjError] = useState("");
   const [cnpjTouched, setCnpjTouched] = useState(false);
   const [telefone, setTelefone] = useState("");
+  const [telefoneError, setTelefoneError] = useState("");
+  const [telefoneTouched, setTelefoneTouched] = useState(false);
+
+  // Perguntas
+  const [perguntaDestaque, setPerguntaDestaque] = useState<number | null>(null);
+
+  // Progresso salvo
+  const [progressoSalvo, setProgressoSalvo] = useState<any>(null);
   const [camposPerfil, setCamposPerfil] = useState<CampoPerfil[]>([]);
   const [dadosPerfil, setDadosPerfil] = useState<Record<string, string | boolean>>({});
 
@@ -193,6 +217,70 @@ export default function DiagnosticoPage() {
   } | null>(null);
   const [conviteErro, setConviteErro] = useState<string | null>(null);
   const [validandoConvite, setValidandoConvite] = useState(false);
+
+  // ── localStorage: carregar progresso salvo ──────────────────────────────
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) setProgressoSalvo(JSON.parse(saved));
+    } catch {}
+  }, []);
+
+  // ── localStorage: salvar progresso ──────────────────────────────────────
+  useEffect(() => {
+    if (etapa !== "perguntas" && etapa !== "identificacao" && etapa !== "dados") return;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        formulario_id: formulario?.id,
+        etapa, stepIndex, nome, email,
+        razaoSocial, cnpj, telefone, dadosPerfil, respostas,
+        savedAt: new Date().toISOString(),
+      }));
+    } catch {}
+  }, [etapa, stepIndex, respostas, nome, email, razaoSocial, cnpj, telefone, dadosPerfil]);
+
+  // ── localStorage: limpar ao concluir ────────────────────────────────────
+  useEffect(() => {
+    if (etapa === "resultado") {
+      try { localStorage.removeItem(STORAGE_KEY); } catch {}
+    }
+  }, [etapa]);
+
+  // ── Retomar progresso salvo ──────────────────────────────────────────────
+  async function retomar() {
+    if (!progressoSalvo) return;
+    setCarregando(true);
+    setErro(null);
+    try {
+      const url = progressoSalvo.formulario_id
+        ? `/api/diagnostico/perguntas?formulario_id=${progressoSalvo.formulario_id}`
+        : "/api/diagnostico/perguntas";
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!data.success || !data.ativo) {
+        localStorage.removeItem(STORAGE_KEY);
+        setProgressoSalvo(null);
+        setErro("O formulário foi atualizado. Por favor, inicie um novo diagnóstico.");
+        return;
+      }
+      setFormulario({ ...data.formulario, categorias: data.categorias ?? [] });
+      setCamposPerfil(data.formulario.campos_perfil ?? []);
+      setNome(progressoSalvo.nome || "");
+      setEmail(progressoSalvo.email || "");
+      setRazaoSocial(progressoSalvo.razaoSocial || "");
+      setCnpj(progressoSalvo.cnpj || "");
+      setTelefone(progressoSalvo.telefone || "");
+      setDadosPerfil(progressoSalvo.dadosPerfil || {});
+      setRespostas(progressoSalvo.respostas || {});
+      setStepIndex(progressoSalvo.stepIndex || 0);
+      setEtapa(progressoSalvo.etapa || "perguntas");
+      setProgressoSalvo(null);
+    } catch {
+      setErro("Erro ao retomar. Tente iniciar novamente.");
+    } finally {
+      setCarregando(false);
+    }
+  }
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -303,6 +391,21 @@ export default function DiagnosticoPage() {
     return categoriaAtual.perguntas.every((p) => respostas[p.id] !== undefined);
   }
 
+  function selecionarResposta(perguntaId: number, altId: number) {
+    const novas = { ...respostas, [perguntaId]: altId };
+    setRespostas(novas);
+    if (!categoriaAtual) return;
+    const completo = categoriaAtual.perguntas.every((p) => novas[p.id] !== undefined);
+    if (!completo) return;
+    if (stepIndex < totalSteps - 1) {
+      setTimeout(() => setStepIndex((s) => s + 1), 800);
+    } else {
+      setTimeout(() => {
+        document.getElementById("captcha-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 400);
+    }
+  }
+
   useEffect(() => {
     if (etapa === "perguntas") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -314,6 +417,19 @@ export default function DiagnosticoPage() {
   }, [stepIndex, etapa]);
 
   function avancarPerguntas() {
+    if (!todasRespondidas()) {
+      const faltando = categoriaAtual?.perguntas.find((p) => respostas[p.id] === undefined);
+      if (faltando) {
+        document.getElementById(`q-${faltando.id}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+        setPerguntaDestaque(faltando.id);
+        setTimeout(() => setPerguntaDestaque(null), 1500);
+      }
+      return;
+    }
+    if (stepIndex === totalSteps - 1 && !captchaToken) {
+      document.getElementById("captcha-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     if (stepIndex < totalSteps - 1) {
       setStepIndex((s) => s + 1);
     } else {
@@ -365,6 +481,27 @@ export default function DiagnosticoPage() {
                     100% gratuito e confidencial
                   </span>
                 </div>
+                {progressoSalvo && !conviteErro && (
+                  <div className="mb-4 rounded-xl border border-emerald-400/40 bg-emerald-900/20 px-4 py-4 text-sm text-emerald-300">
+                    <p className="font-semibold mb-2">Você tem um diagnóstico em andamento.</p>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={retomar}
+                        disabled={carregando}
+                        className="flex items-center gap-1.5 rounded-lg bg-emerald-400 px-4 py-2 text-sm font-bold text-[#173b22] transition hover:bg-emerald-300 disabled:opacity-60"
+                      >
+                        {carregando ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
+                        Retomar
+                      </button>
+                      <button
+                        onClick={() => { localStorage.removeItem(STORAGE_KEY); setProgressoSalvo(null); }}
+                        className="rounded-lg border border-emerald-400/40 px-4 py-2 text-sm font-semibold text-emerald-300 transition hover:bg-emerald-900/30"
+                      >
+                        Começar do zero
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {conviteErro && (
                   <div className="mb-4 rounded-xl border border-red-400/40 bg-red-900/30 px-4 py-3 text-sm text-red-300">
                     {conviteErro}
@@ -696,10 +833,32 @@ export default function DiagnosticoPage() {
                 <Input
                   id="telefone"
                   value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
+                  onChange={(e) => {
+                    const formatted = formatTelefone(e.target.value);
+                    setTelefone(formatted);
+                    if (telefoneTouched && formatted) {
+                      setTelefoneError(validateTelefone(formatted) ? "" : "Telefone inválido.");
+                    } else {
+                      setTelefoneError("");
+                    }
+                  }}
+                  onBlur={() => {
+                    setTelefoneTouched(true);
+                    if (!telefone.trim()) { setTelefoneError(""); return; }
+                    setTelefoneError(validateTelefone(telefone) ? "" : "Telefone inválido.");
+                  }}
                   placeholder="(00) 00000-0000"
-                  className="border-[#dfe7d8] focus-visible:ring-emerald-400/30 focus-visible:border-emerald-400"
+                  className={`border-[#dfe7d8] focus-visible:ring-emerald-400/30 focus-visible:border-emerald-400 ${
+                    telefoneTouched && telefoneError
+                      ? "border-red-400 focus-visible:border-red-400"
+                      : telefoneTouched && telefone && !telefoneError
+                      ? "border-emerald-400"
+                      : ""
+                  }`}
                 />
+                {telefoneTouched && telefoneError && (
+                  <p className="text-red-500 text-xs mt-1">{telefoneError}</p>
+                )}
               </div>
 
               {/* Campos de perfil dinâmicos */}
@@ -892,44 +1051,48 @@ export default function DiagnosticoPage() {
 
             {/* Perguntas */}
             <div className="space-y-5">
-              {categoriaAtual.perguntas.map((pergunta, qi) => (
-                <div
-                  key={pergunta.id}
-                  className="bg-white rounded-2xl border border-[#dfe7d8] shadow-[0_4px_24px_rgba(23,59,34,0.06)] p-5 sm:p-6"
-                >
-                  <p className="text-sm sm:text-base font-semibold text-[#173b22] mb-4 leading-snug">
-                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-400/20 text-emerald-700 text-xs font-bold mr-2 shrink-0">
-                      {qi + 1}
-                    </span>
-                    {pergunta.texto}
-                  </p>
-                  <div className="space-y-2">
-                    {pergunta.alternativas.map((alt, ai) => {
-                      const selecionada = respostas[pergunta.id] === alt.id;
-                      return (
-                        <button
-                          key={alt.id}
-                          type="button"
-                          onClick={() =>
-                            setRespostas((r) => ({ ...r, [pergunta.id]: alt.id }))
-                          }
-                          className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all ${
-                            selecionada
-                              ? "bg-[#173b22] text-white border-[#173b22]"
-                              : "bg-[#f7f7f2] text-[#4a5f50] border-[#dfe7d8] hover:border-[#173b22]/30 hover:bg-[#f0f4ee]"
-                          }`}
-                        >
-                          {alt.texto}
-                        </button>
-                      );
-                    })}
+              {categoriaAtual.perguntas.map((pergunta, qi) => {
+                const destaque = perguntaDestaque === pergunta.id;
+                return (
+                  <div
+                    key={pergunta.id}
+                    id={`q-${pergunta.id}`}
+                    className={`bg-white rounded-2xl border shadow-[0_4px_24px_rgba(23,59,34,0.06)] p-5 sm:p-6 transition-all duration-300 ${
+                      destaque ? "border-red-400 ring-2 ring-red-300/50" : "border-[#dfe7d8]"
+                    }`}
+                  >
+                    <p className="text-sm sm:text-base font-semibold text-[#173b22] mb-4 leading-snug">
+                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-400/20 text-emerald-700 text-xs font-bold mr-2 shrink-0">
+                        {qi + 1}
+                      </span>
+                      {pergunta.texto}
+                    </p>
+                    <div className="space-y-2">
+                      {pergunta.alternativas.map((alt) => {
+                        const selecionada = respostas[pergunta.id] === alt.id;
+                        return (
+                          <button
+                            key={alt.id}
+                            type="button"
+                            onClick={() => selecionarResposta(pergunta.id, alt.id)}
+                            className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all ${
+                              selecionada
+                                ? "bg-[#173b22] text-white border-[#173b22]"
+                                : "bg-[#f7f7f2] text-[#4a5f50] border-[#dfe7d8] hover:border-[#173b22]/30 hover:bg-[#f0f4ee]"
+                            }`}
+                          >
+                            {alt.texto}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {stepIndex === totalSteps - 1 && (
-              <div className="pt-2 flex justify-center">
+              <div id="captcha-section" className="pt-2 flex justify-center">
                 <HCaptcha
                   ref={captchaRef}
                   sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY!}
@@ -967,7 +1130,7 @@ export default function DiagnosticoPage() {
               </Button>
               <Button
                 onClick={avancarPerguntas}
-                disabled={!todasRespondidas() || enviando || (stepIndex === totalSteps - 1 && !captchaToken)}
+                disabled={enviando}
                 className="flex-1 bg-[#173b22] hover:bg-[#0f2a18] text-white font-semibold py-3 h-auto rounded-xl disabled:opacity-40"
               >
                 {enviando ? (
@@ -982,7 +1145,11 @@ export default function DiagnosticoPage() {
               </Button>
             </div>
             <p className="text-center text-xs text-[#4a5f50] mt-3">
-              Responda todas as perguntas para avançar.
+              {todasRespondidas() && stepIndex === totalSteps - 1 && !captchaToken
+                ? "Complete a verificação de segurança para enviar."
+                : !todasRespondidas()
+                ? "Responda todas as perguntas para avançar."
+                : ""}
             </p>
           </div>
         )}

@@ -87,6 +87,7 @@ export default function AdminDiagnosticoPage() {
   const [formularioFiltro, setFormularioFiltro] = useState<string>("all");
   const [busca, setBusca] = useState("");
   const [classificacaoFiltro, setClassificacaoFiltro] = useState("");
+  const [origemFiltro, setOrigemFiltro] = useState("");
   const [stats, setStats] = useState<Stats | null>(null);
   const [resultados, setResultados] = useState<Resultado[]>([]);
   const [total, setTotal] = useState(0);
@@ -127,7 +128,7 @@ export default function AdminDiagnosticoPage() {
 
   useEffect(() => {
     setPagina(1);
-  }, [formularioFiltro, busca, classificacaoFiltro]);
+  }, [formularioFiltro, busca, classificacaoFiltro, origemFiltro]);
 
   useEffect(() => {
     setLoading(true);
@@ -135,6 +136,7 @@ export default function AdminDiagnosticoPage() {
     if (formularioFiltro !== "all") p.set("formulario_id", formularioFiltro);
     if (busca) p.set("busca", busca);
     if (classificacaoFiltro) p.set("classificacao", classificacaoFiltro);
+    if (origemFiltro) p.set("origem", origemFiltro);
     p.set("page", String(pagina));
     p.set("per_page", String(POR_PAGINA));
 
@@ -148,7 +150,7 @@ export default function AdminDiagnosticoPage() {
         }
       })
       .finally(() => setLoading(false));
-  }, [formularioFiltro, busca, classificacaoFiltro, pagina]);
+  }, [formularioFiltro, busca, classificacaoFiltro, origemFiltro, pagina]);
 
   const totalCriticos = stats?.por_classificacao.find((p) => p.classificacao === "Crítico")?.total ?? 0;
   const melhorCategoria = stats?.media_por_categoria.reduce(
@@ -293,6 +295,15 @@ export default function AdminDiagnosticoPage() {
             <option value="Vulnerável">Vulnerável</option>
             <option value="Em Desenvolvimento">Em Desenvolvimento</option>
             <option value="Conformidade Adequada">Conformidade Adequada</option>
+          </select>
+          <select
+            value={origemFiltro}
+            onChange={(e) => setOrigemFiltro(e.target.value)}
+            className="h-11 rounded-xl border border-[#E6DED0] px-3 text-sm outline-none focus:border-[#0f3d2e] focus:ring-2 focus:ring-[#0f3d2e]/10"
+          >
+            <option value="">Todas as origens</option>
+            <option value="site">Site</option>
+            <option value="convite">Convite</option>
           </select>
         </div>
 

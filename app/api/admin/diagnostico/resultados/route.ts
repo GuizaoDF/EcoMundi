@@ -10,6 +10,7 @@ export async function GET(req: Request) {
   const formularioId = searchParams.get("formulario_id");
   const classificacao = searchParams.get("classificacao");
   const busca = searchParams.get("busca");
+  const origem = searchParams.get("origem");
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10));
   const perPage = Math.min(100, Math.max(1, parseInt(searchParams.get("per_page") ?? "20", 10)));
   const offset = (page - 1) * perPage;
@@ -31,11 +32,13 @@ export async function GET(req: Request) {
       const like = `%${busca}%`;
       values.push(like, like, like);
     }
+    if (origem === "convite") conditions.push("c.id IS NOT NULL");
+    else if (origem === "site") conditions.push("c.id IS NULL");
 
     const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
     const [countRows] = await db.execute(
-      `SELECT COUNT(*) AS total FROM diagnostico_resultados r ${where}`,
+      `SELECT COUNT(*) AS total FROM diagnostico_resultados r LEFT JOIN diagnostico_convites c ON c.resultado_id = r.id ${where}`,
       values
     ) as any[];
 

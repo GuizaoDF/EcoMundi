@@ -481,9 +481,6 @@ export default function DiagnosticoPage() {
                       {cat.percentual.toFixed(0)}%
                     </span>
                   </div>
-                  <p className="text-xs text-[#4a5f50] mt-1">
-                    {cat.pontuacao}/{cat.pontuacao_max} pts
-                  </p>
                 </div>
               );
             })}

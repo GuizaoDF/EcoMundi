@@ -397,9 +397,7 @@ export default function DiagnosticoPage() {
     if (!categoriaAtual) return;
     const completo = categoriaAtual.perguntas.every((p) => novas[p.id] !== undefined);
     if (!completo) return;
-    if (stepIndex < totalSteps - 1) {
-      setTimeout(() => setStepIndex((s) => s + 1), 800);
-    } else {
+    if (stepIndex === totalSteps - 1) {
       setTimeout(() => {
         document.getElementById("captcha-section")?.scrollIntoView({ behavior: "smooth", block: "center" });
       }, 400);

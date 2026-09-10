@@ -9,10 +9,12 @@ import { Clientes } from "@/components/clientes";
 import { Contact } from "@/components/contact";
 import { Footer } from "@/components/footer";
 import { WhatsAppButton } from "@/components/whatsapp-button";
+import { AvisoEmpresa } from "@/components/aviso-empresa";
 
 export default function Home() {
   return (
     <main>
+      <AvisoEmpresa />
       <Header />
       <Hero />
       <About />

@@ -8,7 +8,9 @@ export async function GET(
     const { slug } = await params;
 
     const [rows]: any = await db.execute(
-      `SELECT id, titulo, slug, resumo, conteudo, imagem, criado_em
+      `SELECT id, titulo, slug, resumo, conteudo,
+              (imagem IS NOT NULL AND imagem != '') AS has_imagem,
+              criado_em
        FROM noticias
        WHERE slug = ? AND publicado = 1`,
       [slug]

@@ -61,7 +61,7 @@ export default function NoticiasPage() {
       </header>
 
       {/* Hero */}
-      <section className="bg-gradient-to-b from-primary/5 to-background pt-8 pb-16 sm:pt-10 sm:pb-20">
+      <section className="bg-gradient-to-b from-primary/5 to-background pt-8 pb-6 sm:pt-10 sm:pb-8">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
           <p className="mb-4 text-sm font-medium uppercase tracking-[0.2em] text-primary">
             Blog & Notícias
@@ -77,7 +77,7 @@ export default function NoticiasPage() {
       </section>
 
       {/* Grid */}
-      <section className="py-16 sm:py-20">
+      <section className="pt-8 pb-16 sm:pt-10 sm:pb-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {loading ? (
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">

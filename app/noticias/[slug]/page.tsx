@@ -12,7 +12,7 @@ interface Noticia {
   slug: string;
   resumo: string | null;
   conteudo: string | null;
-  imagem: string | null;
+  has_imagem: boolean;
   criado_em: string;
 }
 
@@ -78,16 +78,16 @@ export default function NoticiaPage() {
       ) : noticia ? (
         <>
           {/* Hero com imagem ou gradiente */}
-          {noticia.imagem ? (
-            <div className="aspect-[21/8] w-full overflow-hidden">
+          {noticia.has_imagem ? (
+            <div className="aspect-[21/9] w-full overflow-hidden">
               <img
-                src={noticia.imagem}
+                src={`/api/noticias/${slug}/imagem`}
                 alt={noticia.titulo}
                 className="h-full w-full object-cover"
               />
             </div>
           ) : (
-            <div className="flex aspect-[21/8] w-full items-center justify-center bg-gradient-to-br from-[#0f3d2e] to-[#1a5c44]">
+            <div className="flex aspect-[21/9] w-full items-center justify-center bg-gradient-to-br from-[#0f3d2e] to-[#1a5c44]">
               <Newspaper className="h-16 w-16 text-white/20" />
             </div>
           )}

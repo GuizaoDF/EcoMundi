@@ -79,11 +79,14 @@ export default function NoticiaPage() {
         <>
           {/* Hero com imagem ou gradiente */}
           {noticia.has_imagem ? (
-            <div className="aspect-[21/9] w-full overflow-hidden">
-              <img
+            <div className="relative aspect-[21/9] w-full overflow-hidden">
+              <Image
                 src={`/api/noticias/${slug}/imagem`}
                 alt={noticia.titulo}
-                className="h-full w-full object-cover"
+                fill
+                sizes="100vw"
+                priority
+                className="object-cover"
               />
             </div>
           ) : (

@@ -24,7 +24,7 @@ export async function GET(
   return new Response(buffer, {
     headers: {
       "Content-Type": meta,
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": "public, max-age=86400, stale-while-revalidate=86400",
     },
   });
 }

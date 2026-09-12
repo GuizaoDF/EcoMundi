@@ -111,12 +111,13 @@ export default function NoticiasPage() {
                 >
                   {/* Imagem ou gradiente */}
                   {noticia.has_imagem ? (
-                    <div className="aspect-[16/10] overflow-hidden">
-                      <img
+                    <div className="relative aspect-[16/10] overflow-hidden">
+                      <Image
                         src={`/api/noticias/${noticia.slug}/imagem?v=${noticia.id}`}
                         alt={noticia.titulo}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                     </div>
                   ) : (

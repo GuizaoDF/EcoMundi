@@ -13,7 +13,7 @@ export interface SessionPayload {
 export async function signToken(payload: SessionPayload): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("7d")
+    .setExpirationTime("2h")
     .sign(secret());
 }
 
